@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GamePassKey — Panel de Administración</title>
+  <meta name="description" content="Panel de administración del sistema GamePassKey." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/admin.css" />
+</head>
+<body class="admin-body">
+
+  <!-- ── Top Nav ──────────────────────────────────────────────── -->
+  <nav class="topnav" id="topnav">
+    <div class="topnav-left">
+      <button onclick="document.querySelector('.sidebar').classList.toggle('collapsed')" style="background:transparent;border:none;color:var(--text-secondary);cursor:pointer;margin-right:15px;display:flex;align-items:center;">
+        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="topnav-logo">
+        <svg class="nav-icon" viewBox="0 0 40 40" fill="none">
+          <rect x="10" y="14" width="20" height="17" rx="2" stroke="#ff6b35" stroke-width="1.5" fill="none"/>
+          <path d="M14 14V11C14 8.24 16.24 6 19 6H21C23.76 6 26 8.24 26 11V14" stroke="#ff6b35" stroke-width="1.5" stroke-linecap="round"/>
+          <circle cx="20" cy="22" r="2.5" fill="#ff6b35"/>
+          <line x1="20" y1="24.5" x2="20" y2="27.5" stroke="#ff6b35" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <div>
+          <span class="nav-brand">GAMEPASSKEY</span>
+          <span class="nav-tagline admin-tag">PANEL DE ADMINISTRACIÓN</span>
+        </div>
+      </div>
+    </div>
+    <div class="topnav-right">
+      <div class="nav-user">
+        <span class="nav-role admin-role">ADMINISTRADOR</span>
+        <span class="nav-username" id="nav-username">Admin</span>
+      </div>
+      <div class="nav-divider"></div>
+      <a href="index.html" class="btn-logout" title="Ir al portal de usuario">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+        PORTAL
+      </a>
+      <button class="btn-logout" onclick="logout()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        SALIR
+      </button>
+    </div>
+  </nav>
+
+  <div class="dashboard-layout">
+
+    <!-- ── Sidebar Admin ──────────────────────────────────────── -->
+    <aside class="sidebar">
+      <nav class="sidebar-nav">
+        <a href="#" class="sidebar-item active" data-section="overview" onclick="switchSection('overview',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          <span>Resumen</span>
+        </a>
+        <a href="#" class="sidebar-item" data-section="juegos" onclick="switchSection('juegos',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          <span>Juegos</span>
+        </a>
+        <a href="#" class="sidebar-item" data-section="usuarios" onclick="switchSection('usuarios',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <span>Usuarios</span>
+        </a>
+        <a href="#" class="sidebar-item" data-section="licencias" onclick="switchSection('licencias',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span>Licencias</span>
+        </a>
+        <a href="#" class="sidebar-item" data-section="codigos" onclick="switchSection('codigos',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M8 10h.01M12 10h.01M16 10h.01M8 14h8"/></svg>
+          <span>Códigos</span>
+        </a>
+        <a href="#" class="sidebar-item" data-section="solicitudes" onclick="switchSection('solicitudes',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span>Solicitudes</span>
+          <span id="solicitudes-badge" class="badge-noti hidden">0</span>
+        </a>
+
+        <a href="#" class="sidebar-item" data-section="soporte" onclick="switchSection('soporte',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+          <span>Soporte</span>
+          <span id="soporte-badge" class="badge-noti hidden">0</span>
+        </a>
+
+        <a href="#" class="sidebar-item" data-section="logs" onclick="switchSection('logs',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          <span>Logs</span>
+        </a>
+      </nav>
+      <div class="sidebar-footer">
+        <div class="system-status">
+          <div class="status-row"><div class="status-dot active"></div><span>API Online</span></div>
+          <div class="status-row"><div class="status-dot active"></div><span>BD Conectada</span></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- ── Main Content ───────────────────────────────────────── -->
+    <main class="main-content">
+
+      <!-- ══ SECCIÓN: RESUMEN ══════════════════════════════════ -->
+      <section id="section-overview" class="content-section active">
+        <div class="section-header">
+          <div><h1 class="section-title">Resumen del Sistema</h1><p class="section-sub">Vista general de GamePassKey</p></div>
+          <button class="btn-secondary" onclick="loadOverview()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Actualizar
+          </button>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid" id="stats-grid">
+          <div class="stat-card" style="cursor:pointer;" onclick="switchSection('usuarios')">
+            <div class="stat-icon" style="--c:#00d4ff"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+            <div class="stat-info"><span class="stat-label">Total Usuarios</span><span class="stat-value" id="stat-usuarios">—</span></div>
+          </div>
+          <div class="stat-card" style="cursor:pointer;" onclick="switchSection('juegos')">
+            <div class="stat-icon" style="--c:#7b61ff"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+            <div class="stat-info"><span class="stat-label">Juegos Activos</span><span class="stat-value" id="stat-juegos">—</span></div>
+          </div>
+          <div class="stat-card" style="cursor:pointer;" onclick="switchSection('licencias')">
+            <div class="stat-icon" style="--c:#00ff88"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+            <div class="stat-info"><span class="stat-label">Licencias Activas</span><span class="stat-value" id="stat-licencias">—</span></div>
+          </div>
+          <div class="stat-card" style="cursor:pointer;" onclick="switchSection('soporte')">
+            <div class="stat-icon" style="--c:#f43f5e"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg></div>
+            <div class="stat-info"><span class="stat-label">Tickets Abiertos</span><span class="stat-value" id="stat-soporte">—</span></div>
+          </div>
+          <div class="stat-card" style="cursor:pointer;" onclick="switchSection('logs')">
+            <div class="stat-icon" style="--c:#ff8c00"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg></div>
+            <div class="stat-info"><span class="stat-label">Eventos de Log</span><span class="stat-value" id="stat-logs">—</span></div>
+          </div>
+        </div>
+
+        <!-- Recent logs preview -->
+        <div class="admin-card" style="margin-top:24px;">
+          <div class="admin-card-header">
+            <h3>Actividad Reciente</h3>
+            <button class="btn-secondary btn-sm" onclick="switchSection('logs', document.querySelector('[data-section=logs]'))">Ver todos</button>
+          </div>
+          <div id="recent-logs"></div>
+        </div>
+      </section>
+
+      <!-- ══ SECCIÓN: JUEGOS ═══════════════════════════════════ -->
+      <section id="section-juegos" class="content-section hidden">
+        <div class="section-header">
+          <div><h1 class="section-title">Gestión de Juegos</h1><p class="section-sub">Catálogo completo de la plataforma</p></div>
+          <button class="btn-admin-primary" onclick="openModal('modal-juego')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nuevo Juego
+          </button>
+        </div>
+        <div class="admin-card">
+          <div id="juegos-table-wrap">
+            <div class="loading-state"><div class="spinner-large"></div><p>Cargando juegos...</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══ SECCIÓN: USUARIOS ════════════════════════════════ -->
+      <section id="section-usuarios" class="content-section hidden">
+        <div class="section-header">
+          <div><h1 class="section-title">Gestión de Usuarios</h1><p class="section-sub">Administra las cuentas del sistema</p></div>
+          <button class="btn-admin-primary" onclick="openModal('modal-usuario')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nuevo Usuario
+          </button>
+        </div>
+        <div class="admin-card">
+          <div id="usuarios-table-wrap">
+            <div class="loading-state"><div class="spinner-large"></div><p>Cargando usuarios...</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══ SECCIÓN: LICENCIAS ═══════════════════════════════ -->
+      <section id="section-licencias" class="content-section hidden">
+        <div class="section-header">
+          <div><h1 class="section-title">Gestión de Licencias</h1><p class="section-sub">Asigna y administra licencias de juegos</p></div>
+          <button class="btn-admin-primary" onclick="openModal('modal-licencia')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nueva Licencia
+          </button>
+        </div>
+        <div class="admin-card">
+          <div id="licencias-table-wrap">
+            <div class="loading-state"><div class="spinner-large"></div><p>Cargando licencias...</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── SECCIÓN: SOLICITUDES ── -->
+      <section id="section-solicitudes" class="content-section hidden">
+        <div class="admin-header">
+          <div>
+            <h1>Solicitudes de Activación</h1>
+            <p>Gestiona las peticiones de los usuarios para acceder a juegos del catálogo</p>
+          </div>
+          <button class="btn-primary" onclick="loadSolicitudes()">Actualizar Lista</button>
+        </div>
+
+        <div class="admin-card">
+          <div id="solicitudes-table-wrap" style="overflow-x:auto;">
+            <!-- Tabla de solicitudes -->
+          </div>
+        </div>
+      </section>
+
+      <!-- ══ SECCIÓN: CÓDIGOS ═══════════════════════════════════ -->
+      <section id="section-codigos" class="content-section hidden">
+        <div class="section-header">
+          <div>
+            <h1 class="section-title">Códigos de Uso Único</h1>
+            <p class="section-sub">Genera y administra códigos de acceso de un solo uso</p>
+          </div>
+          <div class="header-actions">
+            <select id="codigos-estado-filter" class="admin-select" style="min-width:160px" onchange="loadCodigos()">
+              <option value="">Todos los estados</option>
+              <option value="disponible">Disponibles</option>
+              <option value="usado">Usados</option>
+              <option value="expirado">Expirados</option>
+            </select>
+            <button class="btn-admin-primary" onclick="openModal('modal-codigo')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Generar Código
+            </button>
+          </div>
+        </div>
+
+        <!-- Stats bar -->
+        <div class="codigos-stats" id="codigos-stats">
+          <div class="codigo-stat-item">
+            <span class="codigo-stat-val" id="cs-disponibles">—</span>
+            <span class="codigo-stat-label">Disponibles</span>
+          </div>
+          <div class="codigo-stat-item">
+            <span class="codigo-stat-val" id="cs-usados">—</span>
+            <span class="codigo-stat-label">Usados</span>
+          </div>
+          <div class="codigo-stat-item">
+            <span class="codigo-stat-val" id="cs-expirados">—</span>
+            <span class="codigo-stat-label">Expirados</span>
+          </div>
+          <div class="codigo-stat-item">
+            <span class="codigo-stat-val" id="cs-total">—</span>
+            <span class="codigo-stat-label">Total</span>
+          </div>
+        </div>
+
+        <div class="admin-card">
+          <div id="codigos-table-wrap">
+            <div class="loading-state"><div class="spinner-large"></div><p>Cargando códigos...</p></div>
+          </div>
+        </div>
+      </section>
+
+
+      <!-- ══ SECCIÓN: LOGS ════════════════════════════════════ -->
+      <section id="section-logs" class="content-section hidden">
+        <div class="section-header">
+          <div><h1 class="section-title">Logs de Seguridad</h1><p class="section-sub">Auditoría de eventos en el sistema</p></div>
+        </div>
+        <div class="admin-card">
+          <div id="logs-table-wrap">
+            <div class="loading-state"><div class="spinner-large"></div><p>Cargando logs...</p></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── SECCIÓN: SOPORTE ────────────────────────────────────────────── -->
+      <section id="section-soporte" class="content-section hidden">
+        <div class="section-header">
+          <div><h1 class="section-title">Tickets de Soporte</h1><p class="section-sub">Consultas y solicitudes de desvinculación de usuarios</p></div>
+        </div>
+        <div class="admin-card">
+          <div id="soporte-table-wrap">
+            <div class="loading-state"><div class="spinner-large"></div><p>Cargando tickets...</p></div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ── MODAL: Dispositivos del Usuario ─────────────────────────────────────── -->
+  <div id="modal-admin-dispositivos" class="modal-overlay hidden" onclick="closeModalOverlay(event,'modal-admin-dispositivos')">
+    <div class="modal-card" style="max-width:800px; width:90%; max-height:80vh; display:flex; flex-direction:column;">
+      <div class="modal-form-header">
+        <h2 id="modal-dispositivos-title">Dispositivos de Usuario</h2>
+        <button class="modal-close" onclick="closeModal('modal-admin-dispositivos')">×</button>
+      </div>
+      <div style="padding: 20px; overflow-y: auto;">
+        <div id="admin-dispositivos-content">
+          <div class="loading-state"><div class="spinner-large"></div><p>Cargando dispositivos...</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MODAL: Resolver Ticket ──────────────────────────────────────────── -->
+  <div id="modal-resolver-ticket" class="modal-overlay hidden" onclick="closeModalOverlay(event,'modal-resolver-ticket')">
+    <div class="modal-content glass-panel">
+      <div class="modal-header">
+        <h3 class="modal-title">Resolver Ticket</h3>
+        <button class="modal-close" onclick="closeModal('modal-resolver-ticket')">✕</button>
+      </div>
+      <div class="modal-body">
+        <form id="form-resolver-ticket" onsubmit="event.preventDefault()">
+          <input type="hidden" id="rt-id">
+          <div class="form-group">
+            <label class="form-label">Mensaje para el usuario (Opcional)</label>
+            <textarea id="rt-respuesta" class="form-input" rows="4" placeholder="Ej: Tu PC ha sido desvinculada exitosamente..."></textarea>
+          </div>
+          <div class="form-actions" style="margin-top: 20px;">
+            <button type="button" class="btn-primary" style="background:#10b981; border-color:#10b981;" onclick="submitResolverTicket('resuelto')">Marcar como Solucionado</button>
+            <button type="button" class="btn-primary" style="background:#ef4444; border-color:#ef4444;" onclick="submitResolverTicket('cerrado')">Rechazar / Cerrar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL: Nuevo/Editar Juego ════════════════════════════ -->
+  <div id="modal-juego" class="modal-overlay hidden" onclick="closeModalOverlay(event,'modal-juego')">
+    <div class="modal-card modal-form">
+      <div class="modal-form-header">
+        <h2 id="modal-juego-title">Nuevo Juego</h2>
+        <button class="modal-close" onclick="closeModal('modal-juego')">✕</button>
+      </div>
+      <form id="form-juego" onsubmit="submitJuego(event)">
+        <input type="hidden" id="juego-id" />
+        <div class="form-grid-2">
+          <div class="admin-form-group">
+            <label>Título *</label>
+            <input type="text" id="j-titulo" required placeholder="Nombre del juego" />
+          </div>
+          <div class="admin-form-group">
+            <label>Género</label>
+            <input type="text" id="j-genero" placeholder="Ej: RPG, Action" />
+          </div>
+          <div class="admin-form-group">
+            <label>Desarrollador</label>
+            <input type="text" id="j-desarrollador" placeholder="Estudio desarrollador" />
+          </div>
+          <div class="admin-form-group">
+            <label>Versión</label>
+            <input type="text" id="j-version" placeholder="Ej: 1.0.0" />
+          </div>
+          <div class="admin-form-group">
+            <label>Fecha de lanzamiento</label>
+            <input type="date" id="j-fecha" />
+          </div>
+          <div class="admin-form-group">
+            <label>Estado</label>
+            <select id="j-estado" class="admin-select">
+              <option value="activo">Activo</option>
+              <option value="inactivo">Inactivo</option>
+              <option value="mantenimiento">Mantenimiento</option>
+            </select>
+        </div>
+          </div>
+        <div class="form-grid-2">
+          <div class="admin-form-group" style="grid-column: span 2;">
+            <label>Carátula (Opcional)</label>
+            <input type="file" id="j-caratula" accept="image/*" />
+            <small style="color:var(--text-muted);font-size:0.7rem;margin-top:4px;">Selecciona una imagen para subir como carátula.</small>
+          </div>
+        </div>
+        <div class="admin-form-group">
+          <label>Descripción</label>
+          <textarea id="j-descripcion" rows="3" placeholder="Descripción del juego..."></textarea>
+        </div>
+        <div class="admin-form-group">
+          <label>Ruta instalador</label>
+          <input type="text" id="j-ruta" placeholder="games/nombre/setup.exe" />
+        </div>
+        <div id="form-juego-error" class="alert alert-error hidden"><span id="form-juego-error-msg"></span></div>
+        <div class="modal-form-actions">
+          <button type="button" class="btn-secondary" onclick="closeModal('modal-juego')">Cancelar</button>
+          <button type="submit" class="btn-admin-primary" id="btn-submit-juego">
+            <span class="btn-text">GUARDAR</span>
+            <span class="btn-loader hidden"><span class="spinner"></span></span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ══ MODAL: Nuevo Usuario ═════════════════════════════════ -->
+  <div id="modal-usuario" class="modal-overlay hidden" onclick="closeModalOverlay(event,'modal-usuario')">
+    <div class="modal-card modal-form">
+      <div class="modal-form-header">
+        <h2>Nuevo Usuario</h2>
+        <button class="modal-close" onclick="closeModal('modal-usuario')">✕</button>
+      </div>
+      <form id="form-usuario" onsubmit="submitUsuario(event)">
+        <div class="form-grid-2">
+          <div class="admin-form-group">
+            <label>Nombre *</label>
+            <input type="text" id="u-nombre" required placeholder="Nombre completo" />
+          </div>
+          <div class="admin-form-group">
+            <label>Correo *</label>
+            <input type="email" id="u-correo" required placeholder="correo@ejemplo.com" />
+          </div>
+          <div class="admin-form-group">
+            <label>Contraseña *</label>
+            <input type="password" id="u-password" required minlength="6" placeholder="Mínimo 6 caracteres" />
+          </div>
+          <div class="admin-form-group">
+            <label>Rol</label>
+            <select id="u-rol" class="admin-select">
+              <option value="2">Cliente</option>
+              <option value="3">Soporte</option>
+              <option value="1">Administrador</option>
+            </select>
+          </div>
+        </div>
+        <div id="form-usuario-error" class="alert alert-error hidden"><span id="form-usuario-error-msg"></span></div>
+        <div class="modal-form-actions">
+          <button type="button" class="btn-secondary" onclick="closeModal('modal-usuario')">Cancelar</button>
+          <button type="submit" class="btn-admin-primary">
+            <span class="btn-text">CREAR USUARIO</span>
+            <span class="btn-loader hidden"><span class="spinner"></span></span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ══ MODAL: Nueva Licencia ════════════════════════════════ -->
+  <div id="modal-licencia" class="modal-overlay hidden" onclick="closeModalOverlay(event,'modal-licencia')">
+    <div class="modal-card modal-form">
+      <div class="modal-form-header">
+        <h2>Nueva Licencia</h2>
+        <button class="modal-close" onclick="closeModal('modal-licencia')">✕</button>
+      </div>
+      <form id="form-licencia" onsubmit="submitLicencia(event)">
+        <div class="form-grid-2">
+          <div class="admin-form-group">
+            <label>Usuario *</label>
+            <select id="l-usuario" class="admin-select" required>
+              <option value="">Seleccionar usuario...</option>
+            </select>
+          </div>
+          <div class="admin-form-group">
+            <label>Juego *</label>
+            <select id="l-juego" class="admin-select" required>
+              <option value="">Seleccionar juego...</option>
+            </select>
+          </div>
+          <div class="admin-form-group">
+            <label>Clave de licencia *</label>
+            <div style="display:flex;gap:8px">
+              <input type="text" id="l-clave" required placeholder="GPK-XXXX-XXXX-XXXX" style="flex:1"/>
+              <button type="button" class="btn-secondary btn-sm" onclick="generarClave()">Auto</button>
+            </div>
+          </div>
+          <div class="admin-form-group">
+            <label>Fecha de expiración</label>
+            <input type="date" id="l-expiracion" />
+          </div>
+        </div>
+        <div id="form-licencia-error" class="alert alert-error hidden"><span id="form-licencia-error-msg"></span></div>
+        <div class="modal-form-actions">
+          <button type="button" class="btn-secondary" onclick="closeModal('modal-licencia')">Cancelar</button>
+          <button type="submit" class="btn-admin-primary">
+            <span class="btn-text">CREAR LICENCIA</span>
+            <span class="btn-loader hidden"><span class="spinner"></span></span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ══ MODAL: Cambiar Estado Usuario ════════════════════════ -->
+  <div id="modal-estado-usuario" class="modal-overlay hidden" onclick="closeModalOverlay(event,'modal-estado-usuario')">
+    <div class="modal-card modal-form" style="max-width:400px">
+      <div class="modal-form-header">
+        <h2>Cambiar Estado</h2>
+        <button class="modal-close" onclick="closeModal('modal-estado-usuario')">✕</button>
+      </div>
+      <div style="padding:8px 0 20px">
+        <p style="color:var(--text-secondary);font-size:0.85rem;margin-bottom:16px;">
+          Usuario: <strong id="estado-user-nombre" style="color:var(--text-primary)"></strong>
+        </p>
+        <div class="admin-form-group">
+          <label>Nuevo estado</label>
+          <select id="estado-nuevo" class="admin-select">
+            <option value="activo">Activo</option>
+            <option value="bloqueado">Bloqueado</option>
+            <option value="inactivo">Inactivo</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-form-actions">
+        <button type="button" class="btn-secondary" onclick="closeModal('modal-estado-usuario')">Cancelar</button>
+        <button type="button" class="btn-admin-primary" onclick="confirmarCambioEstado()">APLICAR CAMBIO</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MODAL: Generar Código ════════════════════════════════ -->
+  <div id="modal-codigo" class="modal-overlay hidden" onclick="closeModalOverlay(event,'modal-codigo')">
+    <div class="modal-card modal-form" style="max-width:520px">
+      <div class="modal-form-header">
+        <h2>Generar Código de Uso Único</h2>
+        <button class="modal-close" onclick="closeModal('modal-codigo')">✕</button>
+      </div>
+      <form id="form-codigo" onsubmit="submitCodigo(event)" style="padding:24px 28px">
+
+        <div class="codigo-preview-box" id="codigo-preview">
+          <span id="codigo-preview-text">XXXX-XXXX-XXXX-XXXX</span>
+          <button type="button" class="btn-copy" id="btn-copy-codigo" onclick="copiarCodigo()" title="Copiar código">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          </button>
+        </div>
+
+        <div style="display:flex;gap:10px;margin-bottom:20px">
+          <button type="button" class="btn-secondary" style="flex:1;justify-content:center" onclick="autoGenerarCodigo()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            Auto-generar
+          </button>
+          <input type="text" id="c-codigo" placeholder="O escribe tu código personalizado"
+            style="flex:2;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;color:var(--text-primary);font-family:var(--font-mono);font-size:0.85rem"
+            oninput="document.getElementById('codigo-preview-text').textContent = this.value || 'XXXX-XXXX-XXXX-XXXX'" />
+        </div>
+
+        <div class="form-grid-2">
+          <div class="admin-form-group">
+            <label>Juego asociado *</label>
+            <select id="c-juego" class="admin-select" required>
+              <option value="">Seleccionar juego...</option>
+            </select>
+          </div>
+          <div class="admin-form-group">
+            <label>Fecha de expiración *</label>
+            <input type="datetime-local" id="c-expiracion" required />
+          </div>
+        </div>
+
+        <div id="form-codigo-error" class="alert alert-error hidden">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          <span id="form-codigo-error-msg"></span>
+        </div>
+
+        <div class="modal-form-actions" style="margin-top:16px">
+          <button type="button" class="btn-secondary" onclick="closeModal('modal-codigo')">Cancelar</button>
+          <button type="submit" class="btn-admin-primary" id="btn-submit-codigo">
+            <span class="btn-text">GENERAR CÓDIGO</span>
+            <span class="btn-loader hidden"><span class="spinner"></span></span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── MODAL: Confirmación Genérica ── -->
+  <div id="modal-confirm" class="modal-overlay hidden" onclick="closeModalOverlay(event,'modal-confirm')">
+    <div class="modal-card modal-form" style="max-width:400px; text-align:center;">
+      <div class="modal-form-header" style="justify-content:center; padding-bottom:10px; border-bottom:none;">
+        <h2 id="confirm-title" style="color:var(--text-primary); font-size:1.2rem;">Confirmar Acción</h2>
+      </div>
+      <div style="padding:10px 20px 25px;">
+        <p id="confirm-message" style="color:var(--text-secondary); font-size:0.95rem; line-height:1.5;"></p>
+      </div>
+      <div class="modal-form-actions" style="justify-content:center; gap:16px;">
+        <button type="button" class="btn-secondary" onclick="closeModal('modal-confirm')">Cancelar</button>
+        <button type="button" class="btn-admin-primary" id="btn-confirm-action" style="min-width:120px;">
+          <span class="btn-text" id="confirm-action-text">ACEPTAR</span>
+          <span class="btn-loader hidden" id="confirm-action-loader"><span class="spinner"></span></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container" class="toast-container"></div>
+
+  <script type="module" src="js/main_admin.js"></script>
+</body>
+</html>

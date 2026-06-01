@@ -1,0 +1,10 @@
+import tkinter as tk
+root = tk.Tk()
+root.title("Apex Racing - Ejecutándose vía GamePassKey")
+root.geometry("800x600")
+root.configure(bg="black")
+lbl = tk.Label(root, text="¡Estás jugando a Apex Racing!", font=("Arial", 24, "bold"), fg="#00d4ff", bg="black")
+lbl.pack(expand=True)
+btn = tk.Button(root, text="Cerrar Juego", command=root.destroy, font=("Arial", 14), bg="#ff3355", fg="white")
+btn.pack(pady=40)
+root.mainloop()

@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GamePassKey — Acceso al Sistema</title>
+  <meta name="description" content="Plataforma de gestión de licencias y juegos digitales GamePassKey." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <!-- ================================================================
+       VISTA: LOGIN
+  ================================================================ -->
+  <div id="view-login" class="view active">
+    <div class="login-bg">
+      <div class="grid-overlay"></div>
+      <div class="scan-line"></div>
+    </div>
+
+    <div class="login-container">
+      <!-- Panel izquierdo -->
+      <div class="login-left">
+        <div class="login-logo-wrap">
+          <div class="logo-icon">
+            <svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <rect x="20" y="28" width="40" height="34" rx="4" stroke="#00d4ff" stroke-width="2.5" fill="none"/>
+              <path d="M28 28V22C28 16.477 32.477 12 38 12H42C47.523 12 52 16.477 52 22V28" stroke="#00d4ff" stroke-width="2.5" stroke-linecap="round"/>
+              <circle cx="40" cy="44" r="5" fill="#00d4ff"/>
+              <line x1="40" y1="49" x2="40" y2="55" stroke="#00d4ff" stroke-width="2.5" stroke-linecap="round"/>
+              <circle cx="58" cy="55" r="8" fill="none" stroke="#4a9eff" stroke-width="2"/>
+              <line x1="62" y1="59" x2="67" y2="64" stroke="#4a9eff" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="55" y1="55" x2="61" y2="55" stroke="#4a9eff" stroke-width="2" stroke-linecap="round"/>
+              <line x1="58" y1="52" x2="58" y2="58" stroke="#4a9eff" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <h1 class="logo-text">GAMEPASSKEY</h1>
+          <p class="logo-sub">CONEXIÓN SEGURA</p>
+          <p class="logo-version">V2.0.4 WEB</p>
+        </div>
+
+        <div class="login-left-footer">
+          <div class="status-dot active"></div>
+          <span>SISTEMA OPERATIVO</span>
+        </div>
+      </div>
+
+      <!-- Panel derecho: Formulario -->
+      <div class="login-right">
+        <div class="login-form-header">
+          <h2>Autenticación de Usuario</h2>
+          <p>Ingresa tus credenciales para acceder al sistema</p>
+        </div>
+
+        <form id="login-form" class="login-form" novalidate>
+          <div class="form-group">
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+              </span>
+              <input type="email" id="login-correo" placeholder="Correo electrónico" autocomplete="email" required />
+              <div class="input-line"></div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+              </span>
+              <input type="password" id="login-password" placeholder="Contraseña" autocomplete="current-password" required />
+              <button type="button" class="toggle-password" onclick="togglePassword()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                  <circle cx="12" cy="12" r="3"/>
+                </svg>
+              </button>
+              <div class="input-line"></div>
+            </div>
+          </div>
+
+          <div id="login-error" class="alert alert-error hidden">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span id="login-error-msg">Error al iniciar sesión</span>
+          </div>
+
+          <button type="submit" id="btn-login" class="btn-primary">
+            <span class="btn-text">INICIAR SESIÓN</span>
+            <span class="btn-loader hidden">
+              <span class="spinner"></span>
+            </span>
+          </button>
+
+          <div class="login-links">
+            <a href="#" class="link-subtle">¿Olvidó su contraseña?</a>
+            <a href="#" class="link-subtle" onclick="openRegisterModal(); return false;">Crear cuenta</a>
+          </div>
+        </form>
+
+        <div class="login-footer-info">
+          <span class="terminal-text">// GAMEPASSKEY SECURE TERMINAL v2.0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       VISTA: DASHBOARD
+  ================================================================ -->
+  <div id="view-dashboard" class="view hidden">
+
+    <!-- Top Navigation -->
+    <nav class="topnav" id="topnav">
+      <div class="topnav-left">
+        <button onclick="document.querySelector('.sidebar').classList.toggle('collapsed')" style="background:transparent;border:none;color:var(--text-secondary);cursor:pointer;margin-right:15px;display:flex;align-items:center;">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="topnav-logo">
+          <svg class="nav-icon" viewBox="0 0 40 40" fill="none">
+            <rect x="10" y="14" width="20" height="17" rx="2" stroke="#00d4ff" stroke-width="1.5" fill="none"/>
+            <path d="M14 14V11C14 8.24 16.24 6 19 6H21C23.76 6 26 8.24 26 11V14" stroke="#00d4ff" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="20" cy="22" r="2.5" fill="#00d4ff"/>
+            <line x1="20" y1="24.5" x2="20" y2="27.5" stroke="#00d4ff" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+          <div>
+            <span class="nav-brand">GAMEPASSKEY</span>
+            <span class="nav-tagline">DIRECTORIO DE APLICACIONES INTERACTIVAS</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="topnav-center">
+        <div class="search-bar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input type="text" id="search-input" placeholder="Buscar en el catálogo..." />
+        </div>
+      </div>
+
+      <div class="topnav-right">
+        <!-- Notificaciones -->
+        <div class="nav-notifications" onclick="toggleNotifications()" title="Notificaciones">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span class="notification-dot hidden" id="notification-dot"></span>
+        </div>
+        <div class="nav-divider"></div>
+
+        <div class="nav-user">
+          <span class="nav-role" id="nav-role">OPERADOR</span>
+          <span class="nav-username" id="nav-username">Usuario</span>
+        </div>
+        <div class="nav-divider"></div>
+        <a id="btn-admin-link" href="admin.html" class="btn-logout hidden" title="Panel de Administración" style="color:var(--accent-orange);border-color:rgba(255,107,53,0.3)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
+          ADMIN
+        </a>
+        <button class="btn-logout" onclick="logout()" title="Cerrar sesión">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          SALIR
+        </button>
+      </div>
+    </nav>
+
+    <!-- Main Layout -->
+    <div class="dashboard-layout">
+
+      <!-- Sidebar -->
+      <aside class="sidebar">
+        <nav class="sidebar-nav">
+          <a href="#" class="sidebar-item active" data-section="biblioteca" onclick="switchSection('biblioteca', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>
+            <span>Biblioteca</span>
+          </a>
+          <a href="#" class="sidebar-item" data-section="juegos" onclick="switchSection('juegos', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/>
+            </svg>
+            <span>Catálogo</span>
+          </a>
+          <a href="#" class="sidebar-item" data-section="licencias" onclick="switchSection('licencias', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <span>Licencias</span>
+          </a>
+          <a href="#" class="sidebar-item" data-section="dispositivos" onclick="switchSection('dispositivos', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/>
+            </svg>
+            <span>Dispositivos</span>
+          </a>
+          <a href="#" class="sidebar-item" data-section="perfil" onclick="switchSection('perfil', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+            <span>Mi Perfil</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="system-status">
+            <div class="status-row">
+              <div class="status-dot active"></div>
+              <span>Backend Online</span>
+            </div>
+            <div class="status-row">
+              <div class="status-dot active"></div>
+              <span>Base de datos OK</span>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- Content Area -->
+      <main class="main-content">
+
+        <!-- ── SECCIÓN: BIBLIOTECA ── -->
+        <section id="section-biblioteca" class="content-section active">
+          <div class="section-header">
+            <div>
+              <h1 class="section-title">Mi Biblioteca</h1>
+              <p class="section-sub">Tus juegos disponibles y listos para jugar</p>
+            </div>
+            <div class="header-actions">
+              <div class="filter-tabs">
+                <button class="filter-tab active" onclick="filterGames('todos', this)">Todos</button>
+                <button class="filter-tab" onclick="filterGames('activo', this)">Disponibles</button>
+              </div>
+              <button class="btn-secondary" onclick="openRedeemModal()" style="margin-left:12px">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M8 10h.01M12 10h.01M16 10h.01"/></svg>
+                Canjear Código
+              </button>
+            </div>
+          </div>
+
+          <div id="library-loading" class="loading-state">
+            <div class="spinner-large"></div>
+            <p>Cargando biblioteca...</p>
+          </div>
+
+          <div id="library-empty" class="empty-state hidden">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            <h3>Tu biblioteca está vacía</h3>
+            <p>Canjea un código de acceso para agregar tu primer juego</p>
+            <button class="btn-primary" style="margin-top:20px;" onclick="openRedeemModal()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M8 10h.01M12 10h.01M16 10h.01"/></svg>
+              CANJEAR CÓDIGO
+            </button>
+          </div>
+
+          <div id="games-grid" class="games-grid hidden"></div>
+        </section>
+
+        <!-- ── SECCIÓN: CATÁLOGO ── -->
+        <section id="section-juegos" class="content-section hidden">
+          <div class="section-header">
+            <div>
+              <h1 class="section-title">Catálogo de Juegos</h1>
+              <p class="section-sub">Todos los juegos disponibles en la plataforma</p>
+            </div>
+          </div>
+          <div id="catalog-grid" class="games-grid"></div>
+          <div id="catalog-loading" class="loading-state">
+            <div class="spinner-large"></div>
+            <p>Cargando catálogo...</p>
+          </div>
+        </section>
+
+        <!-- ── SECCIÓN: LICENCIAS ── -->
+        <section id="section-licencias" class="content-section hidden">
+          <div class="section-header">
+            <div>
+              <h1 class="section-title">Mis Licencias</h1>
+              <p class="section-sub">Licencias activas asociadas a tu cuenta</p>
+            </div>
+          </div>
+          <div id="licenses-list" class="list-container">
+            <div class="loading-state">
+              <div class="spinner-large"></div>
+              <p>Cargando licencias...</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── SECCIÓN: DISPOSITIVOS ── -->
+        <section id="section-dispositivos" class="content-section hidden">
+          <div class="section-header">
+            <div>
+              <h1 class="section-title">Mis Dispositivos</h1>
+              <p class="section-sub">Dispositivos autorizados vinculados a tu cuenta</p>
+            </div>
+            <div class="header-actions" style="display:flex; gap:10px;">
+              <button class="btn-primary" style="background:transparent; border: 1px solid rgba(255, 255, 255, 0.2); color: var(--text-secondary);" onclick="openModal('modal-soporte')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                Contactar Soporte
+              </button>
+              <button id="btn-show-register-device" class="btn-secondary" onclick="showRegisterDevice()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Registrar Dispositivo
+              </button>
+            </div>
+          </div>
+          <div id="devices-list" class="list-container">
+            <div class="loading-state">
+              <div class="spinner-large"></div>
+              <p>Cargando dispositivos...</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── SECCIÓN: PERFIL ── -->
+        <section id="section-perfil" class="content-section hidden">
+          <div class="section-header">
+            <div>
+              <h1 class="section-title">Mi Perfil</h1>
+              <p class="section-sub">Información de tu cuenta</p>
+            </div>
+          </div>
+          <div id="profile-content" class="profile-grid">
+            <div class="profile-card glass-card">
+              <div class="profile-avatar">
+                <svg viewBox="0 0 80 80" fill="none">
+                  <circle cx="40" cy="40" r="39" stroke="#00d4ff" stroke-width="1.5"/>
+                  <circle cx="40" cy="30" r="14" fill="none" stroke="#00d4ff" stroke-width="1.5"/>
+                  <path d="M12 68c0-15.464 12.536-28 28-28s28 12.536 28 28" stroke="#00d4ff" stroke-width="1.5" fill="none"/>
+                </svg>
+              </div>
+              <h2 id="profile-name" class="profile-name">—</h2>
+              <p id="profile-email" class="profile-email">—</p>
+              <div class="profile-badge" id="profile-estado">activo</div>
+              <button class="btn-secondary" onclick="openEditProfileModal()" style="margin-top:20px;width:100%">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                Editar Perfil
+              </button>
+            </div>
+
+            <div class="profile-info glass-card">
+              <h3 class="card-title">Información de Cuenta</h3>
+              <div class="info-row"><span>ID Usuario</span><span id="p-id">—</span></div>
+              <div class="info-row"><span>Nombre</span><span id="p-nombre">—</span></div>
+              <div class="info-row"><span>Correo</span><span id="p-correo">—</span></div>
+              <div class="info-row"><span>Estado</span><span id="p-estado">—</span></div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+    </div>
+
+  <!-- ================================================================
+       MODAL: Detalle de Juego
+  ================================================================ -->
+  <div id="modal-game" class="modal-overlay hidden" onclick="closeModal(event)">
+    <div class="modal-card">
+      <button class="modal-close" onclick="document.getElementById('modal-game').classList.add('hidden')">✕</button>
+      <div class="modal-cover" id="modal-cover"></div>
+      <div class="modal-body">
+        <div class="modal-genres" id="modal-genres"></div>
+        <h2 id="modal-title" class="modal-title">—</h2>
+        <p id="modal-desc" class="modal-desc">—</p>
+        <div class="modal-meta">
+          <div class="meta-item"><span>Desarrollador</span><strong id="modal-dev">—</strong></div>
+          <div class="meta-item"><span>Versión</span><strong id="modal-ver">—</strong></div>
+          <div class="meta-item"><span>Lanzamiento</span><strong id="modal-date">—</strong></div>
+          <div class="meta-item"><span>Estado</span><strong id="modal-status">—</strong></div>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-primary" id="modal-play-btn">
+            <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            JUGAR
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       MODAL: Registro de cuenta
+  ================================================================ -->
+  <div id="modal-register" class="modal-overlay hidden" onclick="closeRegisterModal(event)">
+    <div class="modal-card" style="max-width:480px;">
+      <button class="modal-close" onclick="document.getElementById('modal-register').classList.add('hidden')">✕</button>
+      <div class="modal-body" style="padding-top:32px;">
+        <div style="text-align:center;margin-bottom:28px;">
+          <div style="width:56px;height:56px;margin:0 auto 14px;filter:drop-shadow(0 0 12px rgba(0,212,255,0.6))">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="1.5">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+              <circle cx="9" cy="7" r="4"/>
+              <line x1="19" y1="8" x2="19" y2="14"/>
+              <line x1="22" y1="11" x2="16" y2="11"/>
+            </svg>
+          </div>
+          <h2 style="font-family:var(--font-display);font-size:1.1rem;letter-spacing:0.06em;color:#fff;margin-bottom:6px;">Crear Cuenta</h2>
+          <p style="font-size:0.82rem;color:var(--text-secondary);">Regístrate para acceder a GamePassKey</p>
+        </div>
+
+        <form id="register-form" novalidate>
+          <div class="form-group">
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              </span>
+              <input type="text" id="reg-nombre" placeholder="Nombre de usuario" required />
+              <div class="input-line"></div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+              </span>
+              <input type="email" id="reg-correo" placeholder="Correo electrónico" required />
+              <div class="input-line"></div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </span>
+              <input type="password" id="reg-password" placeholder="Contraseña (mín. 6 caracteres)" required />
+              <div class="input-line"></div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              </span>
+              <input type="password" id="reg-password2" placeholder="Confirmar contraseña" required />
+              <div class="input-line"></div>
+            </div>
+          </div>
+
+          <div id="reg-error" class="alert alert-error hidden">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span id="reg-error-msg">Error</span>
+          </div>
+
+          <button type="submit" id="btn-register" class="btn-primary" style="margin-top:8px;">
+            <span class="btn-text">CREAR CUENTA</span>
+            <span class="btn-loader hidden"><span class="spinner"></span></span>
+          </button>
+
+          <p style="text-align:center;margin-top:16px;font-size:0.8rem;color:var(--text-muted);">
+            ¿Ya tienes cuenta?
+            <a href="#" onclick="document.getElementById('modal-register').classList.add('hidden')" style="color:var(--accent-cyan);margin-left:4px;">Iniciar sesión</a>
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- ================================================================
+       MODAL: Editar Perfil
+  ================================================================ -->
+  <div id="modal-edit-profile" class="modal-overlay hidden" onclick="if(event.target===this)closeEditProfileModal()">
+    <div class="modal-card" style="max-width:460px">
+      <button class="modal-close" onclick="closeEditProfileModal()">✕</button>
+      <div class="modal-body" style="padding:36px 32px">
+        <div style="text-align:center;margin-bottom:28px">
+          <div style="width:56px;height:56px;margin:0 auto 14px;filter:drop-shadow(0 0 12px rgba(0,212,255,0.5))">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </div>
+          <h2 style="font-family:var(--font-display);font-size:1.1rem;color:#fff;margin-bottom:6px">Editar Perfil</h2>
+          <p style="font-size:0.82rem;color:var(--text-secondary)">Actualiza tu nombre de usuario o contraseña</p>
+        </div>
+
+        <form id="edit-profile-form" onsubmit="submitEditProfile(event)">
+          <div class="form-group">
+            <label style="color:var(--text-secondary);font-size:0.8rem;margin-bottom:6px;display:block">Nombre de Usuario</label>
+            <div class="input-wrapper">
+              <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+              <input type="text" id="edit-profile-name" placeholder="Nuevo nombre" />
+              <div class="input-line"></div>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top:20px">
+            <label style="color:var(--text-secondary);font-size:0.8rem;margin-bottom:6px;display:block">Contraseña Actual (requerida para cambiarla)</label>
+            <div class="input-wrapper">
+              <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+              <input type="password" id="edit-profile-pass-current" placeholder="Contraseña actual" />
+              <div class="input-line"></div>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top:12px">
+            <label style="color:var(--text-secondary);font-size:0.8rem;margin-bottom:6px;display:block">Nueva Contraseña</label>
+            <div class="input-wrapper">
+              <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+              <input type="password" id="edit-profile-pass-new" placeholder="Mínimo 6 caracteres" />
+              <div class="input-line"></div>
+            </div>
+          </div>
+
+          <div id="edit-profile-error" class="alert alert-error hidden" style="margin-top:16px">
+            <span id="edit-profile-error-msg">Error</span>
+          </div>
+
+          <button id="btn-edit-profile" type="submit" class="btn-primary" style="width:100%;margin-top:20px">
+            <span class="btn-text">GUARDAR CAMBIOS</span>
+            <span class="btn-loader hidden"><span class="spinner"></span></span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       MODAL: Registrar Dispositivo
+  ================================================================ -->
+  <div id="modal-register-device" class="modal-overlay hidden" onclick="if(event.target===this)closeRegisterDevice()">
+    <div class="modal-card" style="max-width:460px">
+      <button class="modal-close" onclick="closeRegisterDevice()">✕</button>
+      <div class="modal-body" style="padding:36px 32px">
+        <div style="text-align:center;margin-bottom:28px">
+          <div style="width:56px;height:56px;margin:0 auto 14px;filter:drop-shadow(0 0 12px rgba(0,212,255,0.5))">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </div>
+          <h2 style="font-family:var(--font-display);font-size:1.1rem;color:#fff;margin-bottom:6px">Registrar Dispositivo</h2>
+          <p style="font-size:0.82rem;color:var(--text-secondary)">Añade este equipo a tu cuenta</p>
+        </div>
+
+        <form id="register-device-form" onsubmit="submitRegisterDevice(event)">
+          <div class="form-group">
+            <label style="color:var(--text-secondary);font-size:0.8rem;margin-bottom:6px;display:block">Nombre del Dispositivo</label>
+            <div class="input-wrapper">
+              <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4" width="16" height="16" rx="2" ry="2"/><rect x="9" y="9" width="6" height="6"/></svg></span>
+              <input type="text" id="reg-dev-name" placeholder="Ej: Mi Laptop Gamer" required />
+              <div class="input-line"></div>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top:20px">
+            <label style="color:var(--text-secondary);font-size:0.8rem;margin-bottom:6px;display:block">Hardware ID (Automático)</label>
+            <div class="input-wrapper">
+              <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
+              <input type="text" id="reg-dev-hwid" readonly style="color:var(--text-muted);background:rgba(0,0,0,0.2)" />
+              <div class="input-line"></div>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top:20px">
+            <label style="color:var(--text-secondary);font-size:0.8rem;margin-bottom:6px;display:block">Sistema Operativo</label>
+            <div class="input-wrapper">
+              <select id="reg-dev-os" style="width:100%;background:rgba(8,14,35,0.6);border:1px solid var(--border);color:var(--text-primary);padding:10px;border-radius:4px;outline:none">
+                <option value="Windows 11">Windows 11</option>
+                <option value="Windows 10">Windows 10</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="reg-dev-error" class="alert alert-error hidden" style="margin-top:16px">
+            <span id="reg-dev-error-msg">Error</span>
+          </div>
+
+          <button id="btn-reg-dev" type="submit" class="btn-primary" style="width:100%;margin-top:20px">
+            <span class="btn-text">REGISTRAR</span>
+            <span class="btn-loader hidden"><span class="spinner"></span></span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       MODAL: Canjear Código
+  ================================================================ -->
+  <div id="modal-redeem" class="modal-overlay hidden" onclick="if(event.target===this)closeRedeemModal()">
+    <div class="modal-card" style="max-width:460px">
+      <button class="modal-close" onclick="closeRedeemModal()">✕</button>
+      <div class="modal-body" style="padding:36px 32px">
+        <div style="text-align:center;margin-bottom:28px">
+          <div style="width:56px;height:56px;margin:0 auto 14px;filter:drop-shadow(0 0 12px rgba(0,212,255,0.5))">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M8 10h.01M12 10h.01M16 10h.01M8 14h8"/></svg>
+          </div>
+          <h2 style="font-family:var(--font-display);font-size:1.1rem;letter-spacing:0.06em;color:#fff;margin-bottom:6px">Canjear Código</h2>
+          <p style="font-size:0.82rem;color:var(--text-secondary)">Ingresa tu código de acceso para activar un juego en tu biblioteca</p>
+        </div>
+
+        <form onsubmit="submitRedeem(event)">
+          <div class="form-group">
+            <div class="input-wrapper">
+              <span class="input-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M8 10h.01M12 10h.01M16 10h.01"/></svg>
+              </span>
+              <input type="text" id="redeem-codigo" placeholder="GPK-XXXX-XXXX-XXXX"
+                style="font-family:var(--font-mono);letter-spacing:0.1em;text-transform:uppercase"
+                oninput="this.value=this.value.toUpperCase()" required />
+              <div class="input-line"></div>
+            </div>
+          </div>
+
+          <div id="redeem-error" class="alert alert-error hidden" style="margin-bottom:16px">
+            <span id="redeem-error-msg">Error</span>
+          </div>
+
+          <button id="btn-redeem" type="submit" class="btn-primary" style="width:100%">
+            <span class="btn-text">ACTIVAR CÓDIGO</span>
+            <span class="btn-loader hidden"><span class="spinner"></span></span>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================================================================
+       TOAST NOTIFICATIONS
+  ================================================================ -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- ================================================================
+       MODAL: Notificaciones
+  ================================================================ -->
+  <div id="modal-notifications" class="modal-overlay hidden" onclick="if(event.target===this)closeNotifications()">
+    <div class="modal-card" style="max-width: 400px; padding: 20px;">
+      <button class="modal-close" onclick="closeNotifications()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+      <div class="modal-header">
+        <h2>Centro de Notificaciones</h2>
+        <p>Tus mensajes y códigos de activación</p>
+      </div>
+        <div class="modal-body" style="max-height: 400px; overflow-y: auto; padding-right: 10px;">
+          <div id="notifications-list" class="notifications-list">
+          <!-- Notificaciones se cargan aquí -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" onclick="closeNotifications()">Cerrar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MODAL: SOPORTE ── -->
+  <div id="modal-soporte" class="modal-overlay hidden" onclick="if(event.target===this)closeModal('modal-soporte')">
+    <div class="modal-card" style="max-width:500px">
+      <button class="modal-close" onclick="closeModal('modal-soporte')">×</button>
+      <div style="padding:10px 20px;">
+        <h2 style="color:var(--text-primary); margin-bottom: 20px; font-size:1.5rem;">Contactar Soporte</h2>
+        <form id="form-soporte" onsubmit="enviarSoporte(event)">
+          <div class="form-group">
+            <label style="color:var(--text-secondary); margin-bottom:8px; display:block; font-size:0.9rem;">Asunto</label>
+            <input type="text" id="soporte-asunto" value="Solicitud de desvinculación de dispositivo" required 
+                   style="width:100%; padding:10px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); color:#fff; border-radius:6px; font-family:var(--font-sans);">
+          </div>
+          <div class="form-group" style="margin-top:15px;">
+            <label style="color:var(--text-secondary); margin-bottom:8px; display:block; font-size:0.9rem;">Mensaje</label>
+            <textarea id="soporte-mensaje" rows="4" required placeholder="Explica detalladamente tu caso (ej. He comprado una nueva PC y necesito borrar la anterior)..." 
+                      style="width:100%; padding:10px; background:rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.1); color:#fff; border-radius:6px; font-family:var(--font-sans); resize:vertical;"></textarea>
+          </div>
+          <button type="submit" class="btn-primary" style="width:100%; margin-top:20px; padding:12px;">Enviar Mensaje</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

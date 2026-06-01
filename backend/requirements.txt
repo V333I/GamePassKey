@@ -1,0 +1,28 @@
+# ==============================================================================
+# GamePassKey — Dependencias del backend
+# ==============================================================================
+# Instalar con:  pip install -r requirements.txt
+# ==============================================================================
+
+# Framework web
+fastapi
+
+# Servidor ASGI
+uvicorn[standard]
+
+# ORM y conector MySQL
+sqlalchemy
+pymysql
+
+# Variables de entorno
+python-dotenv
+
+# Hash de contraseñas (bcrypt)
+passlib[bcrypt]
+
+# Tokens JWT
+python-jose[cryptography]
+
+# Validación con soporte de email
+pydantic[email]
+email-validator
