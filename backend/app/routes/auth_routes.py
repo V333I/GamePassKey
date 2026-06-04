@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 
 from app.auth import crear_token_acceso, verificar_password, ACCESS_TOKEN_EXPIRE_MINUTES, decodificar_token
 from app.database import get_db
-from app.dependencies import registrar_log, security
+from app.dependencies import registrar_log, security, check_rate_limit
 from app.models import Usuario, Sesion
 from app.schemas import LoginRequest, TokenResponse
 
@@ -18,7 +18,7 @@ router = APIRouter(prefix="/auth", tags=["Autenticación"])
 
 
 @router.post("/login", response_model=TokenResponse, summary="Iniciar sesión")
-def login(datos: LoginRequest, request: Request, db: Session = Depends(get_db)):
+def login(datos: LoginRequest, request: Request, db: Session = Depends(get_db), rate_limit: bool = Depends(check_rate_limit("LOGIN_FALLIDO"))):
     """Autentica al usuario y devuelve un token JWT stateful."""
 
     usuario: Usuario | None = (

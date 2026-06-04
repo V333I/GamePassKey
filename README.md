@@ -41,12 +41,14 @@
 - **FastAPI**: Framework de alto rendimiento para construir la API REST.
 - **SQLAlchemy**: ORM para la interacción con la base de datos.
 - **MySQL / PyMySQL**: Motor de base de datos relacional.
+- **Seguridad Avanzada (Stateful JWT)**: Sistema de sesiones respaldado en base de datos. Permite revocar accesos en tiempo real y rastrear IPs/Dispositivos, superando las limitaciones de los JWT tradicionales (stateless).
 - **PyJWT & Passlib**: Para la autenticación y encriptación de contraseñas (Bcrypt).
 - **Uvicorn**: Servidor ASGI para despliegue.
 
 ### Frontend
 - **HTML5 & CSS3 (Vanilla)**: Diseñado completamente desde cero utilizando variables CSS personalizadas y Grid/Flexbox sin depender de frameworks pesados.
-- **JavaScript (Vanilla JS)**: Lógica asíncrona, Fetch API, manipulación del DOM y manejo de sesión local.
+- **JavaScript Modular (ES6)**: Arquitectura limpia y escalable. Todo el código cliente está dividido en pequeños módulos de responsabilidad única (`auth.js`, `api.js`, `admin_games.js`, etc.).
+- **Vanilla JS**: Lógica asíncrona, Fetch API, manipulación del DOM y manejo de sesión local sin dependencias externas.
 
 ### Launcher (Desktop)
 - **Python (CustomTkinter)**: Interfaz gráfica moderna, elegante y 100% responsiva para el cliente de escritorio.

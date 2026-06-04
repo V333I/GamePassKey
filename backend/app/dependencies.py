@@ -134,3 +134,44 @@ def registrar_log(
     )
     db.add(log)
     db.commit()
+
+
+# ---------------------------------------------------------------------------
+# Dependencia: Rate Limiting por IP y Acción (Protección Fuerza Bruta)
+# ---------------------------------------------------------------------------
+
+
+def check_rate_limit(accion_fallida: str, max_intentos: int = 5, ventana_minutos: int = 15):
+    """
+    Retorna una dependencia que cuenta los eventos en logs_seguridad
+    para la IP de origen en los últimos X minutos.
+    Si excede `max_intentos`, lanza un HTTPException 429.
+    """
+    def dependency(request: Request, db: Session = Depends(get_db)):
+        from datetime import datetime, timedelta, timezone
+        
+        ip_origen = request.client.host if request.client else None
+        if not ip_origen:
+            return True
+            
+        ahora = datetime.now(timezone.utc)
+        limite_tiempo = ahora - timedelta(minutes=ventana_minutos)
+        
+        # OJO: fecha_evento en la BD se guarda como datetime.utcnow(), sin timezone
+        # Por lo que es mejor usar datetime.utcnow() para comparar con la BD local
+        limite_tiempo_utc = datetime.utcnow() - timedelta(minutes=ventana_minutos)
+        
+        fallos = db.query(LogSeguridad).filter(
+            LogSeguridad.accion == accion_fallida,
+            LogSeguridad.ip_origen == ip_origen,
+            LogSeguridad.fecha_evento >= limite_tiempo_utc
+        ).count()
+        
+        if fallos >= max_intentos:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail=f"Demasiados intentos fallidos. Por favor, intenta de nuevo en {ventana_minutos} minutos."
+            )
+        return True
+        
+    return dependency
