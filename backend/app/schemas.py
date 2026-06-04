@@ -6,10 +6,11 @@ Define las estructuras de datos esperadas en las peticiones (Request)
 y las devueltas en las respuestas (Response) de la API, validando los datos.
 """
 
+import re
 from datetime import date, datetime
 from typing import Optional, List, Generic, TypeVar
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 T = TypeVar('T')
 
@@ -64,7 +65,16 @@ class UsuarioBase(BaseModel):
 
 class UsuarioCreate(UsuarioBase):
     """Schema para la creación de un nuevo usuario."""
-    password: str = Field(..., min_length=6, description="Contraseña en texto plano")
+    password: str = Field(..., min_length=8, description="Contraseña en texto plano")
+
+    @field_validator('password')
+    @classmethod
+    def validar_password_fuerte(cls, v: str) -> str:
+        if not re.search(r'[A-Z]', v):
+            raise ValueError('La contraseña debe contener al menos una letra mayúscula.')
+        if not re.search(r'[0-9]', v):
+            raise ValueError('La contraseña debe contener al menos un número.')
+        return v
 
 
 class UsuarioUpdate(BaseModel):

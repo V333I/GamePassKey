@@ -17,12 +17,22 @@ from app.dependencies import registrar_log, security, check_rate_limit
 from app.models import Usuario, Sesion
 from app.schemas import LoginRequest, TokenResponse
 
-from pydantic import BaseModel, EmailStr
+import re
+from pydantic import BaseModel, EmailStr, Field, field_validator
 
 class RegisterRequest(BaseModel):
     nombre_usuario: str
     correo: EmailStr
-    password: str
+    password: str = Field(..., min_length=8)
+
+    @field_validator('password')
+    @classmethod
+    def validar_password_fuerte(cls, v: str) -> str:
+        if not re.search(r'[A-Z]', v):
+            raise ValueError('La contraseña debe contener al menos una letra mayúscula.')
+        if not re.search(r'[0-9]', v):
+            raise ValueError('La contraseña debe contener al menos un número.')
+        return v
 
 router = APIRouter(prefix="/auth", tags=["Autenticación"])
 

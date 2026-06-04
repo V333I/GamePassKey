@@ -100,7 +100,17 @@ export async function apiFetch(path, options = {}) {
   if (!res.ok) {
     // Si la respuesta no es OK, extrae el mensaje de error del cuerpo
     const errBody = await res.json().catch(() => ({}));
-    const msg = errBody?.detail || `Error ${res.status}`;
+    
+    let msg = `Error ${res.status}`;
+    if (errBody && errBody.detail) {
+      if (Array.isArray(errBody.detail)) {
+        // Si es un error de validación de Pydantic, unimos los mensajes
+        msg = errBody.detail.map(err => err.msg).join(' | ');
+      } else if (typeof errBody.detail === 'string') {
+        msg = errBody.detail;
+      }
+    }
+    
     throw new Error(msg);
   }
 
