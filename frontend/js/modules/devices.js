@@ -43,6 +43,7 @@ export async function loadDevices() {
             <span>${d.ultimo_uso ? new Date(d.ultimo_uso).toLocaleDateString('es') : '—'}</span>
           </div>
           ${makeBadge(d.estado)}
+          ${d.estado === 'autorizado' ? `<button class="btn-logout" style="padding:4px 8px; font-size:0.8rem; margin-left: 10px; border-color: rgba(255, 107, 53, 0.3); color: var(--accent-orange)" onclick="desvincularDispositivo(${d.id_dispositivo}, event)">Desvincular</button>` : ''}
         </div>`;
       list.appendChild(item);
     });
@@ -105,3 +106,27 @@ export async function submitRegisterDevice(event) {
     btn.disabled = false;
   }
 }
+
+export async function desvincularDispositivo(id, event) {
+  const btn = event ? event.target.closest('button') : null;
+  const oldText = btn ? btn.innerHTML : 'Desvincular';
+  
+  if (btn) {
+    btn.innerHTML = '<span class="spinner" style="width:14px;height:14px"></span>';
+    btn.disabled = true;
+  }
+  
+  try {
+    await ApiDispositivos.desvincular(id);
+    showToast('Dispositivo desvinculado con éxito.', 'success');
+    loadDevices();
+  } catch (err) {
+    showToast(err.message, 'error');
+    if (btn) {
+      btn.innerHTML = oldText;
+      btn.disabled = false;
+    }
+  }
+}
+
+window.desvincularDispositivo = desvincularDispositivo;

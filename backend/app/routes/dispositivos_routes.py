@@ -101,6 +101,54 @@ def dispositivos_usuario(
 
 
 
+@router.post("/{id_dispositivo}/desvincular", response_model=dict, summary="Desvincular dispositivo")
+def desvincular_dispositivo(
+    id_dispositivo: int,
+    request: Request,
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_current_user),
+):
+    from datetime import datetime, timedelta, timezone
+    from app.models import LogSeguridad
+
+    # 1. Verificar propiedad del dispositivo
+    dispositivo = db.query(Dispositivo).filter(Dispositivo.id_dispositivo == id_dispositivo).first()
+    if not dispositivo or dispositivo.id_usuario != usuario.id_usuario:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Dispositivo no encontrado o no te pertenece.")
+    
+    if dispositivo.estado == "eliminado":
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="El dispositivo ya está desvinculado.")
+
+    # 2. Verificar Cooldown (1 vez cada 30 días)
+    limite_tiempo_utc = datetime.utcnow() - timedelta(days=30)
+    
+    ultimo_desvinculo = db.query(LogSeguridad).filter(
+        LogSeguridad.accion == "DESVINCULAR_DISPOSITIVO",
+        LogSeguridad.id_usuario == usuario.id_usuario,
+        LogSeguridad.fecha_evento >= limite_tiempo_utc
+    ).order_by(LogSeguridad.fecha_evento.desc()).first()
+
+    if ultimo_desvinculo:
+        dias_restantes = 30 - (datetime.utcnow() - ultimo_desvinculo.fecha_evento).days
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail=f"Ya has desvinculado un dispositivo recientemente. Por seguridad, debes esperar {dias_restantes} días para desvincular otro."
+        )
+
+    # 3. Proceder con la desvinculación
+    dispositivo.estado = "eliminado"
+    db.commit()
+    
+    # 4. Registrar acción para iniciar cooldown
+    registrar_log(
+        db, "DESVINCULAR_DISPOSITIVO",
+        f"Dispositivo {dispositivo.nombre_dispositivo} ({dispositivo.hardware_id}) desvinculado por el usuario.",
+        id_usuario=usuario.id_usuario,
+        ip_origen=request.client.host if request.client else None
+    )
+
+    return {"message": "Dispositivo desvinculado con éxito."}
+
 @router.put("/{id_dispositivo}/estado", response_model=DispositivoResponse, summary="Cambiar estado dispositivo")
 def cambiar_estado_dispositivo(
     id_dispositivo: int,

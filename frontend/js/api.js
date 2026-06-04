@@ -81,6 +81,8 @@ export const ApiDispositivos = {
     apiFetch('/dispositivos/mis-dispositivos'),
   registrar: (datos) =>
     apiFetch('/dispositivos', { method: 'POST', body: JSON.stringify(datos) }),
+  desvincular: (id) =>
+    apiFetch(`/dispositivos/${id}/desvincular`, { method: 'POST' }),
 };
 
 // ── Códigos ───────────────────────────────────────────────────────
