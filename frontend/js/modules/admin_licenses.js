@@ -2,15 +2,23 @@ import { api } from './admin_api.js';
 import { allUsers, allGames, setAllUsers, setAllGames } from './admin_state.js';
 import { showToast, showConfirmModal, closeModal, makeBadge } from './admin_ui.js';
 
+/**
+ * Carga la tabla de licencias desde la API y mapea los nombres de usuarios y juegos.
+ * @async
+ * @returns {Promise<void>}
+ */
 export async function loadLicencias() {
   const wrap = document.getElementById('licencias-table-wrap');
   wrap.innerHTML = `<div class="loading-state"><div class="spinner-large"></div><p>Cargando...</p></div>`;
 
   try {
-    if (!allUsers.length) setAllUsers(await api('/usuarios'));
+    if (!allUsers.length) {
+      const uRes = await api('/usuarios?limit=500');
+      setAllUsers(uRes.items || uRes);
+    }
     if (!allGames.length) setAllGames(await api('/juegos?estado=todos'));
 
-    const misLicencias = await api('/licencias/mis-licencias').catch(() => []);
+    const misLicencias = await api('/licencias').catch(() => []);
 
     const usersMap = {};
     allUsers.forEach(u => { usersMap[u.id_usuario] = u; });
@@ -49,6 +57,12 @@ export async function loadLicencias() {
   }
 }
 
+/**
+ * Solicita confirmación y revoca una licencia específica.
+ * @async
+ * @param {number} id - El ID de la licencia a revocar.
+ * @returns {Promise<void>}
+ */
 export async function revocarLicencia(id) {
   const confirmed = await showConfirmModal('Revocar Licencia', '¿Revocar esta licencia? El usuario perderá acceso al juego.');
   if (!confirmed) return;
@@ -61,12 +75,22 @@ export async function revocarLicencia(id) {
   }
 }
 
+/**
+ * Genera aleatoriamente una clave de licencia en formato GPK-XXXX-XXXX-XXXX y
+ * la coloca en el campo correspondiente del formulario de creación.
+ */
 export function generarClave() {
   const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
   const seg = () => Array.from({length: 4}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
   document.getElementById('l-clave').value = `GPK-${seg()}-${seg()}-${seg()}`;
 }
 
+/**
+ * Procesa el envío del formulario para crear una nueva licencia y la asocia a un usuario y juego.
+ * @async
+ * @param {Event} e - Evento de envío del formulario.
+ * @returns {Promise<void>}
+ */
 export async function submitLicencia(e) {
   e.preventDefault();
   const errEl  = document.getElementById('form-licencia-error');
@@ -93,6 +117,10 @@ export async function submitLicencia(e) {
   }
 }
 
+/**
+ * Llena los menús desplegables (selects) de usuarios y juegos en el modal de creación de licencias.
+ * Muestra solo juegos activos.
+ */
 export function populateLicenciaSelects() {
   const userSel = document.getElementById('l-usuario');
   const gameSel = document.getElementById('l-juego');

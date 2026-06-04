@@ -3,12 +3,29 @@ import { setAllUsers, setEditingUserId, editingUserId } from './admin_state.js';
 import { makeBadge, openModal, closeModal, showToast } from './admin_ui.js';
 import { abrirDispositivosUsuario } from './admin_devices.js';
 
-export async function loadUsuarios() {
+let currentUserPage = 0;
+const USER_PAGE_LIMIT = 50;
+
+/**
+ * Carga la lista de usuarios paginada desde la API y renderiza la tabla en el panel de administrador.
+ * @async
+ * @param {number} [page=0] - El índice de la página actual.
+ * @returns {Promise<void>}
+ */
+export async function loadUsuarios(page = 0) {
+  currentUserPage = page;
   const wrap = document.getElementById('usuarios-table-wrap');
   wrap.innerHTML = `<div class="loading-state"><div class="spinner-large"></div><p>Cargando...</p></div>`;
   try {
-    const usuarios = await api('/usuarios');
+    const skip = page * USER_PAGE_LIMIT;
+    const res = await api(`/usuarios?skip=${skip}&limit=${USER_PAGE_LIMIT}`);
+    const usuarios = res.items || res; // fallback if backend not updated yet
+    const total = res.total || usuarios.length;
+    
     setAllUsers(usuarios);
+    
+    const totalPages = Math.ceil(total / USER_PAGE_LIMIT);
+    
     wrap.innerHTML = `
       <table class="admin-table">
         <thead><tr>
@@ -32,12 +49,28 @@ export async function loadUsuarios() {
             </div></td>
           </tr>`).join('')}
         </tbody>
-      </table>`;
+      </table>
+      ${totalPages > 1 ? `
+        <div class="pagination-controls">
+          <button ${page === 0 ? 'disabled' : ''} onclick="loadUsuarios(${page - 1})">&laquo; Anterior</button>
+          <span>Página ${page + 1} de ${totalPages}</span>
+          <button ${page >= totalPages - 1 ? 'disabled' : ''} onclick="loadUsuarios(${page + 1})">Siguiente &raquo;</button>
+        </div>
+      ` : ''}
+    `;
   } catch (err) {
     wrap.innerHTML = `<div class="empty-state"><h3>Error</h3><p>${err.message}</p></div>`;
   }
 }
 
+window.loadUsuarios = loadUsuarios;
+
+/**
+ * Abre el modal para cambiar el estado de un usuario específico.
+ * @param {number} id - ID del usuario.
+ * @param {string} nombre - Nombre del usuario a mostrar en el modal.
+ * @param {string} estadoActual - El estado actual del usuario para preseleccionar en el formulario.
+ */
 export function abrirCambioEstado(id, nombre, estadoActual) {
   setEditingUserId(id);
   document.getElementById('estado-user-nombre').textContent = nombre;
@@ -45,6 +78,11 @@ export function abrirCambioEstado(id, nombre, estadoActual) {
   openModal('modal-estado-usuario');
 }
 
+/**
+ * Envía la petición PUT para confirmar y guardar el nuevo estado de un usuario.
+ * @async
+ * @returns {Promise<void>}
+ */
 export async function confirmarCambioEstado() {
   const nuevoEstado = document.getElementById('estado-nuevo').value;
   try {
@@ -60,6 +98,13 @@ export async function confirmarCambioEstado() {
   }
 }
 
+/**
+ * Envía la petición POST para crear un nuevo usuario desde el panel de administración.
+ * Realiza una validación visual del error si ocurre un fallo.
+ * @async
+ * @param {Event} e - Evento de envío del formulario.
+ * @returns {Promise<void>}
+ */
 export async function submitUsuario(e) {
   e.preventDefault();
   const errEl  = document.getElementById('form-usuario-error');

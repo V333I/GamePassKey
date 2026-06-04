@@ -7,27 +7,31 @@ PUT  /usuarios/{id}     → actualizar datos
 PUT  /usuarios/{id}/estado → cambiar estado
 """
 
-from typing import List
-
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import List, Optional
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 
 from app.auth import generar_hash_password, verificar_password
 from app.database import get_db
 from app.dependencies import get_current_user, registrar_log, require_admin
 from app.models import Rol, Usuario
-from app.schemas import UsuarioCreate, UsuarioEstado, UsuarioResponse, UsuarioUpdate, UsuarioUpdatePerfil
+from app.schemas import UsuarioCreate, UsuarioEstado, UsuarioResponse, UsuarioUpdate, UsuarioUpdatePerfil, PaginatedResponse
 
 router = APIRouter(prefix="/usuarios", tags=["Usuarios"])
 
 
-@router.get("", response_model=List[UsuarioResponse], summary="Listar usuarios")
+@router.get("", response_model=PaginatedResponse[UsuarioResponse], summary="Listar usuarios paginados")
 def listar_usuarios(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=500),
     db: Session = Depends(get_db),
     admin: Usuario = Depends(require_admin),
 ):
-    """Lista todos los usuarios del sistema. Solo administradores."""
-    return db.query(Usuario).order_by(Usuario.nombre_usuario).all()
+    """Lista todos los usuarios del sistema (paginado). Solo administradores."""
+    query = db.query(Usuario)
+    total = query.count()
+    items = query.order_by(Usuario.nombre_usuario).offset(skip).limit(limit).all()
+    return {"total": total, "items": items}
 
 
 @router.get("/perfil", response_model=UsuarioResponse, summary="Mi perfil")

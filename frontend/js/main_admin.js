@@ -1,3 +1,8 @@
+/**
+ * Main Application Entry Point for Admin Dashboard
+ * Handles initialization and attaches modules to the global scope.
+ * @module main_admin
+ */
 import { Auth } from './modules/api.js';
 import * as adminUi from './modules/admin_ui.js';
 import * as adminApi from './modules/admin_api.js';
@@ -11,7 +16,7 @@ import * as adminRequests from './modules/admin_requests.js';
 import * as adminSupport from './modules/admin_support.js';
 import * as adminLogs from './modules/admin_logs.js';
 
-// Attach UI / Navigation globals
+// Attach UI / Navigation globals for inline HTML usage
 window.showToast = adminUi.showToast;
 window.openModal = adminUi.openModal;
 window.closeModal = adminUi.closeModal;
@@ -62,6 +67,7 @@ window.loadLogs = adminLogs.loadLogs;
 
 // Initialization
 document.addEventListener('DOMContentLoaded', () => {
+  // Verifica si el usuario está autenticado, sino lo redirige
   if (!Auth.token()) {
     window.location.href = 'index.html';
     return;
@@ -81,6 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
     adminRequests.checkPendingRequests();
     
     // Auto-refrescar la tabla actual solo si el admin no tiene un modal abierto
+    // Esto evita que la interfaz se reinicie mientras se edita algo
     const isModalOpen = document.querySelectorAll('.modal-overlay:not(.hidden)').length > 0;
     if (!isModalOpen && window.currentAdminSection) {
       switch(window.currentAdminSection) {

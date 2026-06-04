@@ -17,16 +17,29 @@ export const COVER_PALETTES = [
   ['#081a1a', '#0d4a4a', '#00aaaa'],
 ];
 
+/**
+ * Muestra el modal de registro de usuario y limpia los campos y errores previos.
+ */
 export function openRegisterModal() {
   document.getElementById('modal-register').classList.remove('hidden');
   document.getElementById('reg-error').classList.add('hidden');
   document.getElementById('register-form').reset();
 }
+
+/**
+ * Cierra el modal de registro si se hace click fuera de él.
+ * @param {Event} e - El evento de click disparado.
+ */
 export function closeRegisterModal(e) {
   if (e.target === document.getElementById('modal-register'))
     document.getElementById('modal-register').classList.add('hidden');
 }
 
+/**
+ * Muestra una notificación flotante estilo toast en la pantalla.
+ * @param {string} msg - El mensaje a mostrar.
+ * @param {string} [type='success'] - El tipo de notificación ('success', 'error', etc.).
+ */
 export function showToast(msg, type = 'success') {
   const container = document.getElementById('toast-container');
   const toast = document.createElement('div');
@@ -50,6 +63,11 @@ export function showView(viewId) {
 export function showLogin() { showView('view-login'); }
 export function showDashboard() { showView('view-dashboard'); }
 
+/**
+ * Cambia la sección principal visible del Dashboard y actualiza el menú lateral.
+ * @param {string} name - Nombre de la sección (ej. 'biblioteca', 'juegos', etc.).
+ * @param {HTMLElement} [el] - Elemento de menú que activó el cambio, si lo hay.
+ */
 export function switchSection(name, el) {
   document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
   if (el) el.classList.add('active');
@@ -65,6 +83,7 @@ export function switchSection(name, el) {
     section.classList.add('active');
   }
 
+  // Llama a la función de carga correspondiente a la nueva sección
   const loaders = {
     biblioteca:   loadLibrary,
     juegos:       loadCatalog,
@@ -93,7 +112,7 @@ export function generateCover(title, index, coverUrl) {
   if (coverUrl) {
     return `
       <div style="position: absolute; inset: -20px; background-image: url('${coverUrl}'); background-size: cover; background-position: center; filter: blur(15px); opacity: 0.4; z-index: 0;"></div>
-      <img src="${coverUrl}" class="game-cover-img" alt="${title}" style="position: relative; z-index: 1; object-fit: contain;" />
+      <img src="${coverUrl}" class="game-cover-img" alt="" aria-label="${title}" onerror="this.style.opacity='0'; this.style.visibility='hidden';" style="position: relative; z-index: 1; object-fit: contain; color: transparent;" />
     `;
   }
   const pal = COVER_PALETTES[index % COVER_PALETTES.length];
@@ -121,6 +140,14 @@ export function makeBadge(estado) {
   return `<span class="badge ${b.cls}">${b.label}</span>`;
 }
 
+/**
+ * Construye el elemento HTML (tarjeta) para un juego y le asigna sus clases, 
+ * badges y eventos, basándose en la información del juego.
+ * @param {Object} juego - Objeto con los datos del juego.
+ * @param {number} idx - Índice para generar una portada colorida si no tiene imagen.
+ * @param {string} [context='library'] - Contexto de visualización ('library' o 'catalog').
+ * @returns {HTMLElement} El elemento div que representa la tarjeta.
+ */
 export function buildGameCard(juego, idx, context = 'library') {
   const card = document.createElement('div');
   card.className = 'game-card';

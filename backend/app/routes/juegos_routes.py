@@ -27,6 +27,11 @@ async def upload_cover(
     file: UploadFile = File(...),
     current_user: Usuario = Depends(require_admin)
 ):
+    """
+    Sube y guarda la carátula de un juego.
+    Genera un nombre de archivo único y lo guarda en el directorio de assets del frontend.
+    Solo administradores.
+    """
     try:
         # Validar tipo
         if not file.content_type.startswith("image/"):

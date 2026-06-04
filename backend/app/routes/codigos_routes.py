@@ -93,11 +93,14 @@ def usar_codigo(
             detail=f"El código no está disponible. Estado actual: {codigo.estado}.",
         )
 
+    # Comparar expiración con hora actual en UTC
     ahora = datetime.now(timezone.utc)
     expiracion = codigo.fecha_expiracion
+    # Asegurar que la fecha de expiración sea aware de timezone
     if expiracion.tzinfo is None:
         expiracion = expiracion.replace(tzinfo=timezone.utc)
     if expiracion < ahora:
+        # El código ha expirado, actualizar su estado a 'expirado'
         codigo.estado = "expirado"
         db.commit()
         registrar_log(db, "CANJEAR_CODIGO_FALLIDO", f"Intento de canjear código expirado: {datos.codigo}", id_usuario=usuario.id_usuario, ip_origen=request.client.host if request.client else None, nivel="advertencia")

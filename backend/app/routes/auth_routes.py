@@ -1,5 +1,8 @@
 """
 Rutas de autenticación — POST /auth/login, POST /auth/logout
+
+Controla el flujo de inicio de sesión de los usuarios validando contraseñas
+contra la base de datos y devolviendo tokens JWT para su uso en la API.
 """
 
 import uuid
@@ -19,12 +22,26 @@ router = APIRouter(prefix="/auth", tags=["Autenticación"])
 
 @router.post("/login", response_model=TokenResponse, summary="Iniciar sesión")
 def login(datos: LoginRequest, request: Request, db: Session = Depends(get_db), rate_limit: bool = Depends(check_rate_limit("LOGIN_FALLIDO"))):
-    """Autentica al usuario y devuelve un token JWT stateful."""
+    """
+    Autentica al usuario y devuelve un token JWT stateful.
+    
+    Flujo:
+    1. Busca al usuario por su correo electrónico (case-insensitive).
+    2. Comprueba que el hash de su contraseña coincida.
+    3. Verifica que la cuenta esté 'activa' y no bloqueada.
+    4. Crea un ID de sesión único (jti) y lo guarda en la base de datos para control (stateful).
+    5. Genera el Token JWT conteniendo el `sub`, `id_usuario` y `jti`.
+    6. Registra el evento en los logs de seguridad.
+    
+    Implementa Rate Limiting para evitar ataques de fuerza bruta.
+    """
 
+    # Buscar usuario
     usuario: Usuario | None = (
         db.query(Usuario).filter(Usuario.correo == datos.correo.lower().strip()).first()
     )
 
+    # Validar existencia y contraseña
     if usuario is None or not verificar_password(datos.password, usuario.password_hash):
         registrar_log(
             db, accion="LOGIN_FALLIDO",
@@ -38,12 +55,14 @@ def login(datos: LoginRequest, request: Request, db: Session = Depends(get_db), 
             headers={"WWW-Authenticate": "Bearer"},
         )
 
+    # Validar estado de la cuenta
     if usuario.estado != "activo":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Tu cuenta está bloqueada o inactiva. Contacta al administrador.",
         )
 
+    # Actualizar última conexión
     usuario.ultimo_acceso = datetime.now(timezone.utc)
     
     # Crear ID de sesión (jti)
@@ -63,12 +82,13 @@ def login(datos: LoginRequest, request: Request, db: Session = Depends(get_db), 
     db.commit()
     db.refresh(usuario)
 
-    # El payload incluye el jti
+    # El payload incluye el jti para futuras validaciones stateful
     token = crear_token_acceso(
         data={"sub": usuario.correo, "id_usuario": usuario.id_usuario, "jti": jti},
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     )
 
+    # Auditoría
     registrar_log(
         db, accion="LOGIN_EXITOSO",
         descripcion=f"Usuario {usuario.nombre_usuario} inició sesión (jti: {jti[:8]}...).",
@@ -89,7 +109,13 @@ def login(datos: LoginRequest, request: Request, db: Session = Depends(get_db), 
 
 @router.post("/logout", summary="Cerrar sesión")
 def logout(credentials = Depends(security), db: Session = Depends(get_db)):
-    """Invalida el token JWT actual cerrando la sesión en BD."""
+    """
+    Invalida el token JWT actual cerrando la sesión en BD.
+    
+    Extrae el `jti` (JWT ID) del token proporcionado en la cabecera, busca la
+    sesión correspondiente en la base de datos y cambia su estado a 'cerrada'.
+    Esto impide que el mismo token pueda usarse nuevamente (logout real stateful).
+    """
     token = credentials.credentials
     payload = decodificar_token(token)
     if not payload:

@@ -12,15 +12,16 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.dependencies import require_admin
 from app.models import LogSeguridad, Usuario
-from app.schemas import LogResponse
+from app.schemas import LogResponse, PaginatedResponse
 
 router = APIRouter(prefix="/logs", tags=["Logs de Seguridad"])
 
 
-@router.get("", response_model=List[LogResponse], summary="Listar logs de seguridad")
+@router.get("", response_model=PaginatedResponse[LogResponse], summary="Listar logs de seguridad paginados")
 def listar_logs(
     nivel: Optional[str] = Query(None, description="Filtrar por nivel: info | advertencia | critico"),
     accion: Optional[str] = Query(None, description="Filtrar por nombre de acción"),
+    skip: int = Query(0, ge=0),
     limite: int = Query(100, ge=1, le=500, description="Número máximo de registros"),
     db: Session = Depends(get_db),
     admin: Usuario = Depends(require_admin),
@@ -36,7 +37,10 @@ def listar_logs(
     if accion:
         query = query.filter(LogSeguridad.accion.ilike(f"%{accion}%"))
 
-    return query.order_by(LogSeguridad.fecha_evento.desc()).limit(limite).all()
+    total = query.count()
+    items = query.order_by(LogSeguridad.fecha_evento.desc()).offset(skip).limit(limite).all()
+    
+    return {"total": total, "items": items}
 
 
 @router.get("/usuario/{id_usuario}", response_model=List[LogResponse], summary="Logs de un usuario")

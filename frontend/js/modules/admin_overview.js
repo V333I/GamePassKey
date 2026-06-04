@@ -3,9 +3,10 @@ import { setAllUsers, setAllGames } from './admin_state.js';
 
 export async function loadOverview() {
   try {
-    const usuarios = await api('/usuarios');
+    const res = await api('/usuarios?limit=500');
+    const usuarios = res.items || res;
     setAllUsers(usuarios);
-    document.getElementById('stat-usuarios').textContent = usuarios.length;
+    document.getElementById('stat-usuarios').textContent = res.total !== undefined ? res.total : usuarios.length;
   } catch (err) {
     document.getElementById('stat-usuarios').textContent = 'ERR';
     console.error('Usuarios:', err.message);
@@ -30,7 +31,8 @@ export async function loadOverview() {
   }
 
   try {
-    const logs = await api('/logs?limite=5');
+    const resLogs = await api('/logs?limite=5');
+    const logs = resLogs.items || resLogs;
     document.getElementById('stat-logs').textContent = logs.length;
     const logsEl = document.getElementById('recent-logs');
     if (!logs.length) {
@@ -52,8 +54,8 @@ export async function loadOverview() {
   }
 
   try {
-    const licencias = await api('/licencias/mis-licencias');
-    document.getElementById('stat-licencias').textContent = licencias.length;
+    const resLicencias = await api('/licencias?limite=1'); // Just to get the total
+    document.getElementById('stat-licencias').textContent = resLicencias.total !== undefined ? resLicencias.total : (resLicencias.items || resLicencias).length;
   } catch (err) {
     document.getElementById('stat-licencias').textContent = '—';
     console.error('Licencias:', err.message);

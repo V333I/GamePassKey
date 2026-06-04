@@ -1,6 +1,8 @@
 """
 Modelos SQLAlchemy — GamePassKey (esquema completo)
 Cubre las 11 tablas de la base de datos + solicitudes y notificaciones.
+Cada clase representa una tabla en la base de datos relacional y define
+su estructura, tipos de datos, restricciones y relaciones.
 """
 
 from datetime import date, datetime
@@ -25,6 +27,10 @@ from app.database import Base
 # ---------------------------------------------------------------------------
 
 class Rol(Base):
+    """
+    Modelo de la tabla 'roles'.
+    Define los diferentes niveles de acceso del sistema (ej. admin, usuario).
+    """
     __tablename__ = "roles"
 
     id_rol       = Column(Integer, primary_key=True, autoincrement=True)
@@ -32,6 +38,7 @@ class Rol(Base):
     descripcion  = Column(String(255), nullable=True)
     fecha_creacion = Column(DateTime, default=datetime.utcnow, nullable=False)
 
+    # Relación uno a muchos con usuarios
     usuarios = relationship("Usuario", back_populates="rol")
 
 
@@ -40,6 +47,11 @@ class Rol(Base):
 # ---------------------------------------------------------------------------
 
 class Usuario(Base):
+    """
+    Modelo de la tabla 'usuarios'.
+    Almacena la información de autenticación y datos básicos de los clientes
+    y administradores de la plataforma.
+    """
     __tablename__ = "usuarios"
 
     id_usuario    = Column(Integer, primary_key=True, autoincrement=True)
@@ -54,6 +66,7 @@ class Usuario(Base):
     ultimo_acceso = Column(DateTime, nullable=True)
     fecha_creacion= Column(DateTime, default=datetime.utcnow, nullable=False)
 
+    # Relaciones con otras tablas
     rol           = relationship("Rol", back_populates="usuarios")
     licencias     = relationship("Licencia", back_populates="usuario")
     biblioteca    = relationship("BibliotecaUsuario", back_populates="usuario")
@@ -69,6 +82,11 @@ class Usuario(Base):
 # ---------------------------------------------------------------------------
 
 class Juego(Base):
+    """
+    Modelo de la tabla 'juegos'.
+    Contiene el catálogo de aplicaciones/juegos disponibles en la plataforma,
+    incluyendo sus metadatos y rutas de instalación.
+    """
     __tablename__ = "juegos"
 
     id_juego         = Column(Integer, primary_key=True, autoincrement=True)
@@ -86,6 +104,7 @@ class Juego(Base):
     fecha_lanzamiento = Column(Date, nullable=True)
     fecha_creacion    = Column(DateTime, default=datetime.utcnow, nullable=False)
 
+    # Relaciones
     licencias     = relationship("Licencia", back_populates="juego")
     biblioteca    = relationship("BibliotecaUsuario", back_populates="juego")
     instalaciones = relationship("Instalacion", back_populates="juego")
@@ -97,6 +116,10 @@ class Juego(Base):
 # ---------------------------------------------------------------------------
 
 class Licencia(Base):
+    """
+    Modelo de la tabla 'licencias'.
+    Representa el derecho de uso (compra/suscripción) de un usuario sobre un juego.
+    """
     __tablename__ = "licencias"
 
     id_licencia      = Column(Integer, primary_key=True, autoincrement=True)
@@ -110,6 +133,7 @@ class Licencia(Base):
     fecha_compra     = Column(DateTime, default=datetime.utcnow, nullable=True)
     fecha_expiracion = Column(DateTime, nullable=True)
 
+    # Relaciones
     usuario       = relationship("Usuario", back_populates="licencias")
     juego         = relationship("Juego", back_populates="licencias")
     codigos       = relationship("CodigoUsoUnico", back_populates="licencia")
@@ -122,6 +146,11 @@ class Licencia(Base):
 # ---------------------------------------------------------------------------
 
 class CodigoUsoUnico(Base):
+    """
+    Modelo de la tabla 'codigos_uso_unico'.
+    Tokens de seguridad generados para instalaciones específicas,
+    evitando que una misma licencia se use simultáneamente sin control.
+    """
     __tablename__ = "codigos_uso_unico"
 
     id_codigo        = Column(Integer, primary_key=True, autoincrement=True)
@@ -144,6 +173,11 @@ class CodigoUsoUnico(Base):
 # ---------------------------------------------------------------------------
 
 class BibliotecaUsuario(Base):
+    """
+    Modelo de la tabla 'biblioteca_usuario'.
+    Tabla intermedia/registro para acceder rápidamente a los juegos que posee
+    el usuario listos para visualizar o descargar.
+    """
     __tablename__ = "biblioteca_usuario"
 
     id_biblioteca = Column(Integer, primary_key=True, autoincrement=True)
@@ -162,6 +196,11 @@ class BibliotecaUsuario(Base):
 # ---------------------------------------------------------------------------
 
 class Dispositivo(Base):
+    """
+    Modelo de la tabla 'dispositivos'.
+    Registra las computadoras autorizadas por el usuario (HWID, OS) para
+    evitar el abuso de compartir licencias indiscriminadamente.
+    """
     __tablename__ = "dispositivos"
 
     id_dispositivo    = Column(Integer, primary_key=True, autoincrement=True)
@@ -187,6 +226,11 @@ class Dispositivo(Base):
 # ---------------------------------------------------------------------------
 
 class Instalacion(Base):
+    """
+    Modelo de la tabla 'instalaciones'.
+    Registra qué juego está instalado, con qué licencia, en qué dispositivo.
+    Permite trazar el uso activo de las licencias.
+    """
     __tablename__ = "instalaciones"
 
     id_instalacion   = Column(Integer, primary_key=True, autoincrement=True)
@@ -215,6 +259,10 @@ class Instalacion(Base):
 # ---------------------------------------------------------------------------
 
 class Descarga(Base):
+    """
+    Modelo de la tabla 'descargas'.
+    Historial de intentos de descarga de los binarios/instaladores de los juegos.
+    """
     __tablename__ = "descargas"
 
     id_descarga    = Column(Integer, primary_key=True, autoincrement=True)
@@ -238,6 +286,10 @@ class Descarga(Base):
 # ---------------------------------------------------------------------------
 
 class Sesion(Base):
+    """
+    Modelo de la tabla 'sesiones'.
+    Gestión de las sesiones web/API activas para el control de autenticación.
+    """
     __tablename__ = "sesiones"
 
     id_sesion       = Column(Integer, primary_key=True, autoincrement=True)
@@ -260,6 +312,11 @@ class Sesion(Base):
 # ---------------------------------------------------------------------------
 
 class LogSeguridad(Base):
+    """
+    Modelo de la tabla 'logs_seguridad'.
+    Registro de auditoría (Audit Log) para trackear acciones sensibles
+    realizadas por administradores o anomalías de usuarios.
+    """
     __tablename__ = "logs_seguridad"
 
     id_log      = Column(Integer, primary_key=True, autoincrement=True)
@@ -281,6 +338,10 @@ class LogSeguridad(Base):
 # ---------------------------------------------------------------------------
 
 class SolicitudActivacion(Base):
+    """
+    Modelo de la tabla 'solicitudes_activacion'.
+    Permite a un usuario normal pedir autorización/licencia para un juego específico.
+    """
     __tablename__ = "solicitudes_activacion"
 
     id_solicitud     = Column(Integer, primary_key=True, autoincrement=True)
@@ -302,6 +363,10 @@ class SolicitudActivacion(Base):
 # ---------------------------------------------------------------------------
 
 class Notificacion(Base):
+    """
+    Modelo de la tabla 'notificaciones'.
+    Alertas internas para el panel de usuario (ej. solicitud aprobada).
+    """
     __tablename__ = "notificaciones"
 
     id_notificacion = Column(Integer, primary_key=True, autoincrement=True)
@@ -318,6 +383,10 @@ class Notificacion(Base):
 # ---------------------------------------------------------------------------
 
 class TicketSoporte(Base):
+    """
+    Modelo de la tabla 'tickets_soporte'.
+    Sistema básico de contacto/ayuda entre el usuario y el administrador.
+    """
     __tablename__ = "tickets_soporte"
 
     id_ticket      = Column(Integer, primary_key=True, autoincrement=True)

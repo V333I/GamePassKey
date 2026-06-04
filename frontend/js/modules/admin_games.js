@@ -3,6 +3,12 @@ import { api } from './admin_api.js';
 import { allGames, setAllGames } from './admin_state.js';
 import { makeBadge, showConfirmModal, showToast, closeModal } from './admin_ui.js';
 
+/**
+ * Carga la lista de juegos del catálogo para el panel de administración
+ * y renderiza la tabla.
+ * @async
+ * @returns {Promise<void>}
+ */
 export async function loadJuegos() {
   const wrap = document.getElementById('juegos-table-wrap');
   wrap.innerHTML = `<div class="loading-state"><div class="spinner-large"></div><p>Cargando...</p></div>`;
@@ -43,6 +49,10 @@ export async function loadJuegos() {
   }
 }
 
+/**
+ * Abre el modal de edición de juego y precarga sus datos en el formulario.
+ * @param {number} id - El ID del juego a editar.
+ */
 export function editJuego(id) {
   const j = allGames.find(g => g.id_juego === id);
   if (!j) return;
@@ -60,6 +70,13 @@ export function editJuego(id) {
   document.getElementById('modal-juego').classList.remove('hidden');
 }
 
+/**
+ * Procesa el envío del formulario para crear o actualizar un juego.
+ * Gestiona tanto la subida de la carátula como el guardado de los datos.
+ * @async
+ * @param {Event} e - El evento de envío del formulario.
+ * @returns {Promise<void>}
+ */
 export async function submitJuego(e) {
   e.preventDefault();
   const id      = document.getElementById('juego-id').value;
@@ -124,6 +141,12 @@ export async function submitJuego(e) {
   }
 }
 
+/**
+ * Solicita confirmación y elimina un juego permanentemente.
+ * @async
+ * @param {number} id - El ID del juego a eliminar.
+ * @returns {Promise<void>}
+ */
 export async function eliminarJuego(id) {
   const j = allGames.find(g => g.id_juego === id);
   if(!j) return;

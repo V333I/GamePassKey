@@ -63,13 +63,16 @@ def agregar_a_biblioteca(
     if existente:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="El juego ya está en tu biblioteca.")
 
+    # Se crea el objeto de la nueva entrada de la biblioteca
     entrada = BibliotecaUsuario(
         id_usuario=usuario.id_usuario,
         id_juego=datos.id_juego,
         id_licencia=datos.id_licencia,
     )
+    # Se guarda en la base de datos
     db.add(entrada)
     db.commit()
     db.refresh(entrada)
+    # Registrar evento en logs de seguridad
     registrar_log(db, "AGREGAR_BIBLIOTECA", f"Juego {datos.id_juego} agregado a biblioteca.", id_usuario=usuario.id_usuario)
     return entrada

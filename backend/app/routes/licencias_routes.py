@@ -19,6 +19,15 @@ from app.schemas import LicenciaCreate, LicenciaResponse
 router = APIRouter(prefix="/licencias", tags=["Licencias"])
 
 
+@router.get("", response_model=List[LicenciaResponse], summary="Listar todas las licencias")
+def listar_todas_licencias(
+    db: Session = Depends(get_db),
+    admin: Usuario = Depends(require_admin),
+):
+    """Devuelve todas las licencias. Solo administradores."""
+    return db.query(Licencia).order_by(Licencia.fecha_compra.desc()).all()
+
+
 @router.get("/mis-licencias", response_model=List[LicenciaResponse], summary="Mis licencias")
 def mis_licencias(
     db: Session = Depends(get_db),

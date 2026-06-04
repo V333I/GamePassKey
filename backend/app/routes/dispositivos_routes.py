@@ -108,6 +108,10 @@ def desvincular_dispositivo(
     db: Session = Depends(get_db),
     usuario: Usuario = Depends(get_current_user),
 ):
+    """
+    Desvincula un dispositivo del usuario.
+    Verifica que el dispositivo pertenezca al usuario y aplica un cooldown de 30 días para volver a desvincular.
+    """
     from datetime import datetime, timedelta, timezone
     from app.models import LogSeguridad
 

@@ -13,6 +13,11 @@ import { loadSoporte } from './admin_support.js';
 
 import { Auth, ApiAuth } from './api.js';
 
+/**
+ * Muestra una notificación flotante (toast) en el panel de administrador.
+ * @param {string} msg - El mensaje a mostrar.
+ * @param {string} [type='success'] - El tipo de notificación (ej. 'success', 'error').
+ */
 export function showToast(msg, type = 'success') {
   const c = document.getElementById('toast-container');
   const t = document.createElement('div');
@@ -25,6 +30,11 @@ export function showToast(msg, type = 'success') {
   setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3500);
 }
 
+/**
+ * Abre un modal específico usando su ID, aplicando una animación de entrada suave.
+ * También gestiona la carga diferida de datos requeridos por ciertos modales (ej. 'modal-licencia', 'modal-codigo').
+ * @param {string} id - El ID del elemento modal.
+ */
 export function openModal(id) { 
   const m = document.getElementById(id);
   if (m) {
@@ -42,7 +52,7 @@ export function openModal(id) {
   if (id === 'modal-licencia') {
     if (!allUsers.length || !allGames.length) {
       Promise.all([
-        api('/usuarios').then(u => setAllUsers(u)),
+        api('/usuarios?limit=500').then(res => setAllUsers(res.items || res)),
         api('/juegos?estado=todos').then(g => setAllGames(g)),
       ]).then(populateLicenciaSelects).catch(() => {});
     } else {
@@ -72,6 +82,10 @@ export function openModal(id) {
   }
 }
 
+/**
+ * Cierra un modal usando su ID.
+ * @param {string} id - El ID del modal a ocultar.
+ */
 export function closeModal(id) { 
   const m = document.getElementById(id);
   if (m) {
@@ -86,6 +100,11 @@ export function closeModalOverlay(e, id) {
   if (e.target === document.getElementById(id)) closeModal(id);
 }
 
+/**
+ * Cambia la sección visible en el panel de administrador y carga sus datos.
+ * @param {string} name - Nombre de la sección a cargar.
+ * @param {HTMLElement} [el] - Elemento del menú lateral asociado (para marcarlo como activo).
+ */
 export function switchSection(name, el) {
   window.currentAdminSection = name;
   document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
@@ -101,6 +120,13 @@ export function switchSection(name, el) {
   if (loaders[name]) loaders[name]();
 }
 
+/**
+ * Muestra un modal de confirmación dinámico con un título y mensaje.
+ * @async
+ * @param {string} title - El título del modal.
+ * @param {string} message - El mensaje descriptivo de la acción a confirmar.
+ * @returns {Promise<boolean>} Retorna true si el usuario aceptó, false si canceló.
+ */
 export function showConfirmModal(title, message) {
   return new Promise((resolve) => {
     let existing = document.getElementById('dynamic-confirm-modal');
@@ -160,6 +186,11 @@ export function makeBadge(estado) {
   return `<span class="badge ${map[estado] || 'badge-inactive'}">${estado?.toUpperCase() || '—'}</span>`;
 }
 
+/**
+ * Cierra la sesión del administrador y redirige al inicio de sesión.
+ * @async
+ * @returns {Promise<void>}
+ */
 export async function logout() {
   try { await ApiAuth.logout(); } catch(e) {}
   Auth.clear();

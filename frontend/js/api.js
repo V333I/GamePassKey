@@ -1,14 +1,34 @@
 /**
  * GamePassKey — API Service
  * Capa de comunicación con el backend FastAPI en localhost:8000
+ * @module api
  */
 
+/**
+ * Base URL for the API
+ * @type {string}
+ */
 export const API_BASE = 'http://localhost:8000';
 
 // ── Token management ─────────────────────────────────────────────
+/**
+ * Auth object for managing user session and tokens in local storage.
+ * @namespace
+ */
 export const Auth = {
+  /**
+   * Saves the authentication data (token and user details) to local storage.
+   * @param {Object} data - The authentication data object.
+   * @param {string} data.access_token - The JWT access token.
+   * @param {number} data.id_usuario - The user's ID.
+   * @param {string} data.nombre_usuario - The user's name.
+   * @param {string} data.correo - The user's email.
+   * @param {string} data.estado - The user's status.
+   * @param {number} data.id_rol - The user's role ID (1 for Admin, 2 for User).
+   */
   save(data) {
     localStorage.setItem('gpk_token', data.access_token);
+    // Guarda el objeto del usuario serializado en localStorage
     localStorage.setItem('gpk_user', JSON.stringify({
       id_usuario:     data.id_usuario,
       nombre_usuario: data.nombre_usuario,
@@ -17,20 +37,56 @@ export const Auth = {
       id_rol:         data.id_rol,
     }));
   },
+  
+  /**
+   * Retrieves the access token from local storage.
+   * @returns {string|null} The stored token or null if not found.
+   */
   token()   { return localStorage.getItem('gpk_token'); },
-  user()    { const u = localStorage.getItem('gpk_user'); return u ? JSON.parse(u) : null; },
-  clear()   { localStorage.removeItem('gpk_token'); localStorage.removeItem('gpk_user'); },
+  
+  /**
+   * Retrieves the user details from local storage.
+   * @returns {Object|null} The parsed user object or null if not found.
+   */
+  user()    { 
+    const u = localStorage.getItem('gpk_user'); 
+    return u ? JSON.parse(u) : null; 
+  },
+  
+  /**
+   * Clears the authentication data from local storage, effectively logging the user out.
+   */
+  clear()   { 
+    localStorage.removeItem('gpk_token'); 
+    localStorage.removeItem('gpk_user'); 
+  },
+  
+  /**
+   * Checks if the user is currently logged in.
+   * @returns {boolean} True if a token exists, false otherwise.
+   */
   isLoggedIn() { return !!this.token(); },
 };
 
 // ── Base fetch wrapper ────────────────────────────────────────────
+/**
+ * Wrapper for the native fetch API to include authentication headers and error handling.
+ * @async
+ * @param {string} path - The API endpoint path (appended to API_BASE).
+ * @param {Object} [options={}] - Additional fetch options (e.g., method, body).
+ * @returns {Promise<any>} The parsed JSON response data.
+ * @throws {Error} If the response is not OK or if the session has expired.
+ */
 export async function apiFetch(path, options = {}) {
   const token = Auth.token();
   const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+  
+  // Si hay token disponible, lo añade a la cabecera de Autorización
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
   const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
 
+  // Manejo de token expirado o no válido (401 Unauthorized)
   if (res.status === 401) {
     Auth.clear();
     // Assuming showLogin is available globally or imported if needed
@@ -38,9 +94,11 @@ export async function apiFetch(path, options = {}) {
     throw new Error('Sesión expirada. Por favor inicia sesión nuevamente.');
   }
 
+  // Intenta parsear la respuesta a JSON si fue exitosa, o devuelve null
   const data = res.ok ? await res.json().catch(() => ({})) : null;
 
   if (!res.ok) {
+    // Si la respuesta no es OK, extrae el mensaje de error del cuerpo
     const errBody = await res.json().catch(() => ({}));
     const msg = errBody?.detail || `Error ${res.status}`;
     throw new Error(msg);
@@ -50,48 +108,133 @@ export async function apiFetch(path, options = {}) {
 }
 
 // ── Auth ──────────────────────────────────────────────────────────
+/**
+ * Authentication API endpoints.
+ * @namespace
+ */
 export const ApiAuth = {
+  /**
+   * Authenticates a user.
+   * @param {string} correo - The user's email.
+   * @param {string} password - The user's password.
+   * @returns {Promise<Object>} The authentication token and user data.
+   */
   login: (correo, password) =>
     apiFetch('/auth/login', { method: 'POST', body: JSON.stringify({ correo, password }) }),
 };
 
 // ── Juegos ────────────────────────────────────────────────────────
+/**
+ * Games API endpoints.
+ * @namespace
+ */
 export const ApiJuegos = {
+  /**
+   * Retrieves a list of games.
+   * @param {string} [estado='todos'] - The state of the games to retrieve.
+   * @returns {Promise<Array>} List of games.
+   */
   listar: (estado = 'todos') =>
     apiFetch(`/juegos?estado=${estado}`),
+    
+  /**
+   * Retrieves a specific game by ID.
+   * @param {number} id - The ID of the game.
+   * @returns {Promise<Object>} Game details.
+   */
   obtener: (id) =>
     apiFetch(`/juegos/${id}`),
 };
 
 // ── Biblioteca ────────────────────────────────────────────────────
+/**
+ * Library API endpoints.
+ * @namespace
+ */
 export const ApiBiblioteca = {
+  /**
+   * Retrieves the authenticated user's library of games.
+   * @returns {Promise<Array>} List of games in the library.
+   */
   miBiblioteca: () =>
     apiFetch('/biblioteca/mi-biblioteca'),
 };
 
 // ── Licencias ─────────────────────────────────────────────────────
+/**
+ * Licenses API endpoints.
+ * @namespace
+ */
 export const ApiLicencias = {
+  /**
+   * Retrieves the authenticated user's licenses.
+   * @returns {Promise<Array>} List of licenses.
+   */
   misLicencias: () =>
     apiFetch('/licencias/mis-licencias'),
 };
 
 // ── Dispositivos ──────────────────────────────────────────────────
+/**
+ * Devices API endpoints.
+ * @namespace
+ */
 export const ApiDispositivos = {
+  /**
+   * Retrieves the authenticated user's linked devices.
+   * @returns {Promise<Array>} List of devices.
+   */
   misDispositivos: () =>
     apiFetch('/dispositivos/mis-dispositivos'),
+    
+  /**
+   * Registers a new device for the authenticated user.
+   * @param {Object} datos - The device details.
+   * @returns {Promise<Object>} The registered device data.
+   */
   registrar: (datos) =>
     apiFetch('/dispositivos', { method: 'POST', body: JSON.stringify(datos) }),
+    
+  /**
+   * Unlinks a specific device.
+   * @param {number} id - The ID of the device to unlink.
+   * @returns {Promise<Object>} Unlink confirmation.
+   */
   desvincular: (id) =>
     apiFetch(`/dispositivos/${id}/desvincular`, { method: 'POST' }),
 };
 
 // ── Códigos ───────────────────────────────────────────────────────
+/**
+ * Codes (Keys) API endpoints.
+ * @namespace
+ */
 export const ApiCodigos = {
+  /**
+   * Uses/redeems a code.
+   * @param {Object} datos - The code details to redeem.
+   * @param {string} datos.codigo - The code string.
+   * @returns {Promise<Object>} Result of the redemption process.
+   */
   usar: (datos) => apiFetch('/codigos/usar', { method: 'POST', body: JSON.stringify(datos) }),
 };
 
 // ── Perfil ────────────────────────────────────────────────────────
+/**
+ * User Profile API endpoints.
+ * @namespace
+ */
 export const ApiUsuarios = {
+  /**
+   * Retrieves the authenticated user's profile.
+   * @returns {Promise<Object>} The user profile data.
+   */
   miPerfil: () => apiFetch('/usuarios/perfil'),
+  
+  /**
+   * Updates the authenticated user's profile.
+   * @param {Object} datos - The updated profile data.
+   * @returns {Promise<Object>} The updated profile response.
+   */
   actualizarPerfil: (datos) => apiFetch('/usuarios/perfil', { method: 'PUT', body: JSON.stringify(datos) }),
 };
