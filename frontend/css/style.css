@@ -977,6 +977,7 @@ input  { font-family: inherit; outline: none; border: none; }
   justify-content: center;
   padding: 20px;
   animation: fadeIn 0.2s ease;
+  transform: translateZ(0);
 }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
@@ -990,6 +991,7 @@ input  { font-family: inherit; outline: none; border: none; }
   position: relative;
   box-shadow: 0 0 60px rgba(0,100,200,0.2);
   animation: slideUp 0.3s ease;
+  transform: translateZ(0);
 }
 @keyframes slideUp {
   from { transform: translateY(30px); opacity: 0; }
