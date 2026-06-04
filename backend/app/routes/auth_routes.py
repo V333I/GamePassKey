@@ -11,13 +11,92 @@ from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from sqlalchemy.orm import Session
 
-from app.auth import crear_token_acceso, verificar_password, ACCESS_TOKEN_EXPIRE_MINUTES, decodificar_token
+from app.auth import crear_token_acceso, verificar_password, generar_hash_password, ACCESS_TOKEN_EXPIRE_MINUTES, decodificar_token
 from app.database import get_db
 from app.dependencies import registrar_log, security, check_rate_limit
 from app.models import Usuario, Sesion
 from app.schemas import LoginRequest, TokenResponse
 
+from pydantic import BaseModel, EmailStr
+
+class RegisterRequest(BaseModel):
+    nombre_usuario: str
+    correo: EmailStr
+    password: str
+
 router = APIRouter(prefix="/auth", tags=["Autenticación"])
+
+
+@router.post("/register", response_model=TokenResponse, summary="Registrar usuario")
+def register(datos: RegisterRequest, request: Request, db: Session = Depends(get_db)):
+    """
+    Registra un nuevo usuario con rol de USUARIO (2) e inicia sesión automáticamente.
+    """
+    import re
+    if re.search(r'[<>]', datos.nombre_usuario) or re.search(r'[<>]', datos.correo):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Caracteres no permitidos en el nombre o correo."
+        )
+
+    correo_clean = datos.correo.lower().strip()
+    
+    # Verificar si el correo ya existe
+    if db.query(Usuario).filter(Usuario.correo == correo_clean).first():
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="El correo ya está registrado."
+        )
+        
+    # Crear el usuario
+    nuevo_usuario = Usuario(
+        id_rol=2, # 2 = USUARIO
+        nombre_usuario=datos.nombre_usuario,
+        correo=correo_clean,
+        password_hash=generar_hash_password(datos.password),
+        estado="activo",
+        ultimo_acceso=datetime.now(timezone.utc)
+    )
+    db.add(nuevo_usuario)
+    db.commit()
+    db.refresh(nuevo_usuario)
+    
+    registrar_log(
+        db, accion="REGISTRO_USUARIO",
+        descripcion=f"Nuevo usuario registrado: {nuevo_usuario.nombre_usuario} ({nuevo_usuario.correo})",
+        id_usuario=nuevo_usuario.id_usuario,
+        ip_origen=request.client.host if request.client else None,
+    )
+    
+    # Iniciar sesión automáticamente
+    jti = str(uuid.uuid4())
+    expiracion = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    
+    nueva_sesion = Sesion(
+        id_usuario=nuevo_usuario.id_usuario,
+        token_hash=jti,
+        ip_origen=request.client.host if request.client else None,
+        user_agent=request.headers.get("user-agent"),
+        estado="activa",
+        fecha_expiracion=expiracion
+    )
+    db.add(nueva_sesion)
+    db.commit()
+    
+    token = crear_token_acceso(
+        data={"sub": nuevo_usuario.correo, "id_usuario": nuevo_usuario.id_usuario, "jti": jti},
+        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+
+    return TokenResponse(
+        access_token=token,
+        token_type="bearer",
+        id_usuario=nuevo_usuario.id_usuario,
+        nombre_usuario=nuevo_usuario.nombre_usuario,
+        correo=nuevo_usuario.correo,
+        estado=nuevo_usuario.estado,
+        id_rol=nuevo_usuario.id_rol,
+    )
 
 
 @router.post("/login", response_model=TokenResponse, summary="Iniciar sesión")

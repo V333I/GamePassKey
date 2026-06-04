@@ -86,6 +86,13 @@ def crear_usuario(
     admin: Usuario = Depends(require_admin),
 ):
     """Crea un nuevo usuario en el sistema. Solo administradores."""
+    import re
+    if re.search(r'[<>]', datos.nombre_usuario) or re.search(r'[<>]', datos.correo):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Caracteres no permitidos en el nombre o correo."
+        )
+
     # Verificar correo único
     if db.query(Usuario).filter(Usuario.correo == datos.correo.lower().strip()).first():
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="El correo ya está registrado.")
