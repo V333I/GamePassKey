@@ -1,5 +1,5 @@
 import { apiFetch, Auth, ApiAuth, ApiUsuarios } from '../api.js';
-import { showToast, showDashboard, showLogin } from './ui.js';
+import { showToast, showDashboard, showLogin, switchSection } from './ui.js';
 import { loadLibrary } from './library.js';
 
 export function togglePassword() {
@@ -41,6 +41,7 @@ export function initAuth() {
 
       showToast(`¡Bienvenido, ${data.nombre_usuario}!`);
       showDashboard();
+      switchSection('biblioteca', document.querySelector('[onclick="switchSection(\\\'biblioteca\\\', this)"]'));
       loadLibrary();
 
     } catch (err) {
@@ -85,6 +86,7 @@ export function initAuth() {
       document.getElementById('modal-register').classList.add('hidden');
       showToast(`¡Bienvenido, ${data.nombre_usuario}! Cuenta creada exitosamente.`);
       showDashboard();
+      switchSection('biblioteca', document.querySelector('[onclick="switchSection(\\\'biblioteca\\\', this)"]'));
       loadLibrary();
     } catch (err) {
       errorMsg.textContent = err.message;
