@@ -36,9 +36,12 @@ async def upload_cover(
         # Validar tipo
         if not file.content_type.startswith("image/"):
             raise HTTPException(status_code=400, detail="El archivo debe ser una imagen.")
-        
-        # Generar nombre unico
-        ext = file.filename.split(".")[-1]
+            
+        # Generar nombre unico con validacion de extension (Prevencion RCE A08)
+        ext = file.filename.split(".")[-1].lower()
+        if ext not in ["jpg", "jpeg", "png", "webp", "gif"]:
+            raise HTTPException(status_code=400, detail="Extensión de archivo no permitida. Use jpg, png, webp o gif.")
+            
         filename = f"{uuid.uuid4().hex}.{ext}"
         
         # Definir ruta donde se guarda. El path asume que backend/ y frontend/ son hermanos.
@@ -55,9 +58,11 @@ async def upload_cover(
             
         # Devolver URL relativa para el frontend
         return {"imagen_portada": f"assets/covers/{filename}"}
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
+        # Prevención de revelación de rutas (A10)
+        raise HTTPException(status_code=500, detail="Error interno al guardar la imagen.")
 
 
 @router.get("", response_model=List[JuegoResponse], summary="Listar juegos")
