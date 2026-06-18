@@ -2,6 +2,7 @@ import { api } from './admin_api.js';
 import { setAllUsers, setEditingUserId, editingUserId } from './admin_state.js';
 import { makeBadge, openModal, closeModal, showToast } from './admin_ui.js';
 import { abrirDispositivosUsuario } from './admin_devices.js';
+import { escapeHTML } from './ui.js';
 
 let currentUserPage = 0;
 const USER_PAGE_LIMIT = 50;
@@ -34,16 +35,16 @@ export async function loadUsuarios(page = 0) {
         <tbody>${usuarios.map(u => `
           <tr>
             <td><span style="font-family:var(--font-mono);color:var(--text-muted)">#${u.id_usuario}</span></td>
-            <td><strong>${u.nombre_usuario}</strong></td>
-            <td style="font-size:0.8rem;color:var(--text-secondary)">${u.correo}</td>
+            <td><strong>${escapeHTML(u.nombre_usuario)}</strong></td>
+            <td style="font-size:0.8rem;color:var(--text-secondary)">${escapeHTML(u.correo)}</td>
             <td><span style="font-family:var(--font-mono)">${u.id_rol}</span></td>
             <td>${makeBadge(u.estado)}</td>
             <td style="color:var(--text-muted);font-size:0.78rem">${u.ultimo_acceso ? new Date(u.ultimo_acceso).toLocaleString('es') : '-'}</td>
             <td><div class="table-actions">
-              <button class="btn-icon" style="color:#00d4ff;" title="Ver Dispositivos" onclick="abrirDispositivosUsuario(${u.id_usuario}, '${u.nombre_usuario}')">
+              <button class="btn-icon" style="color:#00d4ff;" title="Ver Dispositivos" onclick="abrirDispositivosUsuario(${u.id_usuario}, '${escapeHTML(u.nombre_usuario)}')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
               </button>
-              <button class="btn-icon warning" title="Cambiar estado" onclick="abrirCambioEstado(${u.id_usuario}, '${u.nombre_usuario}', '${u.estado}')">
+              <button class="btn-icon warning" title="Cambiar estado" onclick="abrirCambioEstado(${u.id_usuario}, '${escapeHTML(u.nombre_usuario)}', '${u.estado}')">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M4.93 4.93a10 10 0 0 0 0 14.14"/></svg>
               </button>
             </div></td>

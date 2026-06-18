@@ -18,6 +18,23 @@ export const COVER_PALETTES = [
 ];
 
 /**
+ * Escapa caracteres especiales de HTML para prevenir inyecciones XSS.
+ * @param {string} str - La cadena a escapar.
+ * @returns {string} La cadena escapada segura.
+ */
+export function escapeHTML(str) {
+  if (str === null || str === undefined) return '';
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;'
+  };
+  return String(str).replace(/[&<>"']/g, function(m) { return map[m]; });
+}
+
+/**
  * Muestra el modal de registro de usuario y limpia los campos y errores previos.
  */
 export function openRegisterModal() {
@@ -173,14 +190,14 @@ export function buildGameCard(juego, idx, context = 'library') {
         </div>
     </div>
     <div class="game-info">
-      <div class="game-title">${juego.titulo}</div>
+      <div class="game-title">${escapeHTML(juego.titulo)}</div>
       <div class="game-meta">
-        <span class="game-genre">${juego.genero || 'Sin género'}</span>
-        <span class="game-year">${juego.fecha_lanzamiento ? juego.fecha_lanzamiento.slice(0,4) : '—'}</span>
+        <span class="game-genre">${escapeHTML(juego.genero || 'Sin género')}</span>
+        <span class="game-year">${escapeHTML(juego.fecha_lanzamiento ? juego.fecha_lanzamiento.slice(0,4) : '—')}</span>
       </div>
       <div class="game-footer">
         ${makeBadge(juego.estado)}
-        <span style="font-size:0.68rem;color:var(--text-muted)">v${juego.version_actual || '1.0'}</span>
+        <span style="font-size:0.68rem;color:var(--text-muted)">v${escapeHTML(juego.version_actual || '1.0')}</span>
       </div>
     </div>`;
   return card;

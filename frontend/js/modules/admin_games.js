@@ -2,6 +2,7 @@ import { Auth, API_BASE } from './api.js';
 import { api } from './admin_api.js';
 import { allGames, setAllGames } from './admin_state.js';
 import { makeBadge, showConfirmModal, showToast, closeModal } from './admin_ui.js';
+import { escapeHTML } from './ui.js';
 
 /**
  * Carga la lista de juegos del catálogo para el panel de administración
@@ -27,11 +28,11 @@ export async function loadJuegos() {
         <tbody>${juegos.map(j => `
           <tr>
             <td><span style="font-family:var(--font-mono);color:var(--text-muted)">#${j.id_juego}</span></td>
-            <td><strong>${j.titulo}</strong></td>
-            <td style="color:var(--text-secondary)">${j.genero || '—'}</td>
-            <td style="color:var(--text-secondary)">${j.desarrollador || '—'}</td>
-            <td><span style="font-family:var(--font-mono);font-size:0.75rem">${j.version_actual || '—'}</span></td>
-            <td style="color:var(--text-secondary)">${j.fecha_lanzamiento || '—'}</td>
+            <td><strong>${escapeHTML(j.titulo)}</strong></td>
+            <td style="color:var(--text-secondary)">${escapeHTML(j.genero || '—')}</td>
+            <td style="color:var(--text-secondary)">${escapeHTML(j.desarrollador || '—')}</td>
+            <td><span style="font-family:var(--font-mono);font-size:0.75rem">${escapeHTML(j.version_actual || '—')}</span></td>
+            <td style="color:var(--text-secondary)">${escapeHTML(j.fecha_lanzamiento || '—')}</td>
             <td>${makeBadge(j.estado)}</td>
             <td><div class="table-actions">
               <button class="btn-icon" title="Editar" onclick="editJuego(${j.id_juego})">

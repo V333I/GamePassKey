@@ -1,5 +1,6 @@
 import { api } from './admin_api.js';
 import { showToast, openModal, closeModal, makeBadge } from './admin_ui.js';
+import { escapeHTML } from './ui.js';
 
 export async function checkOpenTickets() {
   try {
@@ -36,9 +37,9 @@ export async function loadSoporte() {
         <tbody>${tickets.map(t => `
           <tr>
             <td><span style="font-family:var(--font-mono);color:var(--text-muted)">#${t.id_ticket}</span></td>
-            <td><strong>${t.nombre_usuario || 'Usuario'}</strong><br><span style="font-size:0.8rem;color:var(--text-secondary)">${t.correo_usuario || ''}</span></td>
-            <td><strong>${t.asunto}</strong></td>
-            <td style="max-width:300px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${t.mensaje}">${t.mensaje}</td>
+            <td><strong>${escapeHTML(t.nombre_usuario || 'Usuario')}</strong><br><span style="font-size:0.8rem;color:var(--text-secondary)">${escapeHTML(t.correo_usuario || '')}</span></td>
+            <td><strong>${escapeHTML(t.asunto)}</strong></td>
+            <td style="max-width:300px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${escapeHTML(t.mensaje)}">${escapeHTML(t.mensaje)}</td>
             <td>${makeBadge(t.estado)}</td>
             <td style="color:var(--text-muted);font-size:0.78rem">${new Date(t.fecha_creacion).toLocaleString('es')}</td>
             <td><div class="table-actions">

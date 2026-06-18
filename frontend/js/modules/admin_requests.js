@@ -1,5 +1,6 @@
 import { api } from './admin_api.js';
 import { showToast, showConfirmModal } from './admin_ui.js';
+import { escapeHTML } from './ui.js';
 
 export async function loadSolicitudes() {
   const wrap = document.getElementById('solicitudes-table-wrap');
@@ -21,8 +22,8 @@ export async function loadSolicitudes() {
         <tbody>${sol.map(s => `
           <tr>
             <td>#${s.id_solicitud}</td>
-            <td><strong>${s.nombre_usuario}</strong><br><small style="color:var(--text-muted)">${s.correo}</small></td>
-            <td><strong>${s.titulo_juego}</strong></td>
+            <td><strong>${escapeHTML(s.nombre_usuario)}</strong><br><small style="color:var(--text-muted)">${escapeHTML(s.correo)}</small></td>
+            <td><strong>${escapeHTML(s.titulo_juego)}</strong></td>
             <td>${new Date(s.fecha_solicitud).toLocaleString('es')}</td>
             <td>
               <span class="badge ${s.estado === 'pendiente' ? 'badge-maintenance' : s.estado === 'aprobada' ? 'badge-active' : 'badge-inactive'}">${s.estado.toUpperCase()}</span>
