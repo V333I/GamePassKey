@@ -53,6 +53,12 @@ def generar_codigo(
     if not licencia:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Licencia no encontrada.")
 
+    import secrets
+    if not datos.codigo:
+        chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+        seg = lambda: ''.join(secrets.choice(chars) for _ in range(4))
+        datos.codigo = f"GPK-{seg()}-{seg()}-{seg()}"
+
     existente = db.query(CodigoUsoUnico).filter(CodigoUsoUnico.codigo == datos.codigo).first()
     if existente:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="El código ya existe.")

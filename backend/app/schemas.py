@@ -166,10 +166,10 @@ class JuegoResponse(BaseModel):
 # ===========================================================================
 
 class LicenciaCreate(BaseModel):
-    """Schema para otorgar una licencia de un juego a un usuario."""
+    """Schema para asignar una licencia a un usuario."""
     id_usuario: int
     id_juego: int
-    clave_licencia: str = Field(..., max_length=255)
+    clave_licencia: Optional[str] = Field(None, max_length=255)
     fecha_expiracion: Optional[datetime] = None
 
 
@@ -193,7 +193,7 @@ class LicenciaResponse(BaseModel):
 class CodigoGenerar(BaseModel):
     """Schema para generar un token de instalación temporal para un juego."""
     id_licencia: int
-    codigo: str = Field(..., max_length=100)
+    codigo: Optional[str] = Field(None, max_length=100)
     fecha_expiracion: datetime
 
 

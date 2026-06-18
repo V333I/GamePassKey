@@ -61,6 +61,12 @@ def crear_licencia(
     admin: Usuario = Depends(require_admin),
 ):
     """Crea una nueva licencia. Solo administradores."""
+    import secrets
+    if not datos.clave_licencia:
+        chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+        seg = lambda: ''.join(secrets.choice(chars) for _ in range(4))
+        datos.clave_licencia = f"GPK-{seg()}-{seg()}-{seg()}"
+        
     existente = db.query(Licencia).filter(Licencia.clave_licencia == datos.clave_licencia).first()
     if existente:
         raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="La clave de licencia ya existe.")

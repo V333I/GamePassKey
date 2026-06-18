@@ -3,11 +3,8 @@ import { api } from './admin_api.js';
 import { showToast, closeModal } from './admin_ui.js';
 
 export function autoGenerarCodigo() {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  const seg = () => Array.from({length:4}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
-  const code = `GPK-${seg()}-${seg()}-${seg()}`;
-  document.getElementById('c-codigo').value = code;
-  document.getElementById('codigo-preview-text').textContent = code;
+  document.getElementById('c-codigo').value = '';
+  document.getElementById('codigo-preview-text').textContent = 'GENERADO DE FORMA SEGURA POR EL SERVIDOR';
 }
 
 export function copiarCodigo() {
@@ -99,7 +96,7 @@ export async function submitCodigo(e) {
   const idJuego = parseInt(document.getElementById('c-juego').value);
   const expiracion = document.getElementById('c-expiracion').value;
 
-  if (!codigo) { errMsg.textContent = 'El código no puede estar vacío.'; errEl.classList.remove('hidden'); return; }
+  if (!idJuego) { errMsg.textContent = 'Selecciona un juego.'; errEl.classList.remove('hidden'); return; }
   if (!idJuego) { errMsg.textContent = 'Selecciona un juego.'; errEl.classList.remove('hidden'); return; }
   if (!expiracion) { errMsg.textContent = 'La fecha de expiración es obligatoria.'; errEl.classList.remove('hidden'); return; }
 
@@ -112,20 +109,20 @@ export async function submitCodigo(e) {
       body: JSON.stringify({
         id_usuario: Auth.user().id_usuario,
         id_juego: idJuego,
-        clave_licencia: codigo,
+        clave_licencia: codigo || null,
         fecha_expiracion: new Date(expiracion).toISOString()
       })
     });
 
-    await api('/codigos/generar', {
+    const resCodigo = await api('/codigos/generar', {
       method: 'POST',
       body: JSON.stringify({
-        codigo: codigo,
+        codigo: codigo || null,
         id_licencia: nuevaLicencia.id_licencia,
         fecha_expiracion: new Date(expiracion).toISOString(),
       }),
     });
-    showToast(`Código "${codigo}" generado correctamente.`);
+    showToast(`Código "${resCodigo.codigo}" generado correctamente.`);
     closeModal('modal-codigo');
     document.getElementById('form-codigo').reset();
     document.getElementById('codigo-preview-text').textContent = 'XXXX-XXXX-XXXX-XXXX';
