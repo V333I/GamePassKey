@@ -23,7 +23,13 @@ load_dotenv()
 # Configuración desde variables de entorno
 # ---------------------------------------------------------------------------
 
-SECRET_KEY: str = os.getenv("SECRET_KEY", "clave_predeterminada_insegura")
+SECRET_KEY: str | None = os.getenv("SECRET_KEY")
+
+if not SECRET_KEY or SECRET_KEY == "clave_predeterminada_insegura" or len(SECRET_KEY) < 32:
+    raise RuntimeError(
+        "CRITICAL SECURITY ERROR: SECRET_KEY no está configurada, usa un valor por defecto o es demasiado corta (mínimo 32 caracteres). "
+        "Por favor, define una SECRET_KEY segura en el archivo .env antes de iniciar el servidor."
+    )
 ALGORITHM: str = os.getenv("ALGORITHM", "HS256")
 ACCESS_TOKEN_EXPIRE_MINUTES: int = int(
     os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "60")
