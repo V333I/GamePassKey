@@ -26,3 +26,6 @@ python-jose[cryptography]
 # Validación con soporte de email
 pydantic[email]
 email-validator
+
+# Rate limiting
+slowapi

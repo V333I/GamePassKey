@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 from app.auth import crear_token_acceso, verificar_password, generar_hash_password, ACCESS_TOKEN_EXPIRE_MINUTES, decodificar_token
 from app.database import get_db
 from app.dependencies import registrar_log, security, check_rate_limit
+from app.limiter import limiter
 from app.models import Usuario, Sesion
 from app.schemas import LoginRequest, TokenResponse
 
@@ -38,6 +39,7 @@ router = APIRouter(prefix="/auth", tags=["Autenticación"])
 
 
 @router.post("/register", response_model=TokenResponse, summary="Registrar usuario")
+@limiter.limit("5/minute")
 def register(datos: RegisterRequest, request: Request, db: Session = Depends(get_db)):
     """
     Registra un nuevo usuario con rol de USUARIO (2) e inicia sesión automáticamente.
@@ -110,6 +112,7 @@ def register(datos: RegisterRequest, request: Request, db: Session = Depends(get
 
 
 @router.post("/login", response_model=TokenResponse, summary="Iniciar sesión")
+@limiter.limit("5/minute")
 def login(datos: LoginRequest, request: Request, db: Session = Depends(get_db), rate_limit: bool = Depends(check_rate_limit("LOGIN_FALLIDO"))):
     """
     Autentica al usuario y devuelve un token JWT stateful.
