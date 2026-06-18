@@ -93,7 +93,18 @@ class UsuarioUpdatePerfil(BaseModel):
     """Schema para la actualización del perfil por el propio usuario."""
     nombre_usuario: Optional[str] = Field(None, max_length=100)
     password_actual: Optional[str] = None
-    password_nuevo: Optional[str] = Field(None, min_length=6)
+    password_nuevo: Optional[str] = Field(None, min_length=8)
+
+    @field_validator('password_nuevo')
+    @classmethod
+    def validar_password_fuerte(cls, v: Optional[str]) -> Optional[str]:
+        if v is None:
+            return v
+        if not re.search(r'[A-Z]', v):
+            raise ValueError('La contraseña debe contener al menos una letra mayúscula.')
+        if not re.search(r'[0-9]', v):
+            raise ValueError('La contraseña debe contener al menos un número.')
+        return v
 
 
 class UsuarioResponse(BaseModel):
