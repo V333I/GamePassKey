@@ -390,13 +390,13 @@ class NotificacionResponse(BaseModel):
 
 class TicketSoporteCreate(BaseModel):
     """Schema para abrir un ticket de soporte/ayuda."""
-    asunto: str
-    mensaje: str
+    asunto: str = Field(..., max_length=150)
+    mensaje: str = Field(..., max_length=2000)
 
 class TicketSoporteResolver(BaseModel):
     """Schema para que un admin resuelva o cierre un ticket."""
-    estado: str  # "resuelto" o "cerrado"
-    respuesta_admin: Optional[str] = None
+    estado: str = Field(..., max_length=50)  # "resuelto" o "cerrado"
+    respuesta_admin: Optional[str] = Field(None, max_length=2000)
 
 class TicketSoporteResponse(BaseModel):
     """Schema de respuesta con los datos de un ticket de soporte."""
