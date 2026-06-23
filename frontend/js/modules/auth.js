@@ -7,6 +7,51 @@ export function togglePassword() {
   input.type = input.type === 'password' ? 'text' : 'password';
 }
 
+// Correo pendiente de verificación OTP (entre el paso 1 y el paso 2 del login).
+let otpCorreoPendiente = null;
+
+/**
+ * Completa el inicio de sesión una vez obtenido el token (con o sin OTP).
+ * @param {Object} data - Respuesta del backend con access_token y datos del usuario.
+ */
+async function completarLogin(data) {
+  Auth.save(data);
+  document.getElementById('nav-username').textContent = data.nombre_usuario;
+
+  try {
+    const perfil = await ApiUsuarios.miPerfil();
+    if (perfil.id_rol === 1) {
+      document.getElementById('nav-role').textContent = 'ADMINISTRADOR';
+      document.getElementById('btn-admin-link').classList.remove('hidden');
+    } else {
+      document.getElementById('nav-role').textContent = 'USUARIO';
+    }
+  } catch { document.getElementById('nav-role').textContent = 'USUARIO'; }
+
+  showToast(`¡Bienvenido, ${data.nombre_usuario}!`);
+  showDashboard();
+  switchSection('biblioteca', document.querySelector('[onclick="switchSection(\\\'biblioteca\\\', this)"]'));
+  loadLibrary();
+}
+
+/** Muestra el formulario de OTP y oculta el de login. */
+function mostrarPasoOtp(correo) {
+  otpCorreoPendiente = correo;
+  document.getElementById('login-form').classList.add('hidden');
+  document.getElementById('otp-form').classList.remove('hidden');
+  document.getElementById('otp-error').classList.add('hidden');
+  const input = document.getElementById('otp-codigo');
+  input.value = '';
+  input.focus();
+}
+
+/** Vuelve del formulario de OTP al de login (cancelar verificación). */
+export function cancelarOtp() {
+  otpCorreoPendiente = null;
+  document.getElementById('otp-form').classList.add('hidden');
+  document.getElementById('login-form').classList.remove('hidden');
+}
+
 export function initAuth() {
   document.getElementById('login-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -25,24 +70,15 @@ export function initAuth() {
 
     try {
       const data = await ApiAuth.login(correo, password);
-      Auth.save(data);
 
-      document.getElementById('nav-username').textContent = data.nombre_usuario;
+      // El usuario tiene 2FA: el backend no devuelve token, pide verificar OTP.
+      if (data.otp_required) {
+        showToast('Te enviamos un código de verificación por Telegram.');
+        mostrarPasoOtp(data.correo || correo);
+        return;
+      }
 
-      try {
-        const perfil = await ApiUsuarios.miPerfil();
-        if (perfil.id_rol === 1) {
-          document.getElementById('nav-role').textContent = 'ADMINISTRADOR';
-          document.getElementById('btn-admin-link').classList.remove('hidden');
-        } else {
-          document.getElementById('nav-role').textContent = 'USUARIO';
-        }
-      } catch { document.getElementById('nav-role').textContent = 'USUARIO'; }
-
-      showToast(`¡Bienvenido, ${data.nombre_usuario}!`);
-      showDashboard();
-      switchSection('biblioteca', document.querySelector('[onclick="switchSection(\\\'biblioteca\\\', this)"]'));
-      loadLibrary();
+      await completarLogin(data);
 
     } catch (err) {
       errorMsg.textContent = err.message;
@@ -51,6 +87,40 @@ export function initAuth() {
       btnText.classList.remove('hidden');
       btnLoad.classList.add('hidden');
       document.getElementById('btn-login').disabled = false;
+    }
+  });
+
+  document.getElementById('otp-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const codigo   = document.getElementById('otp-codigo').value.trim();
+    const errorEl  = document.getElementById('otp-error');
+    const errorMsg = document.getElementById('otp-error-msg');
+    const btnText  = document.querySelector('#btn-otp .btn-text');
+    const btnLoad  = document.querySelector('#btn-otp .btn-loader');
+
+    errorEl.classList.add('hidden');
+
+    if (!otpCorreoPendiente) { cancelarOtp(); return; }
+    if (!codigo) { errorMsg.textContent = 'Ingresa el código recibido.'; errorEl.classList.remove('hidden'); return; }
+
+    btnText.classList.add('hidden');
+    btnLoad.classList.remove('hidden');
+    document.getElementById('btn-otp').disabled = true;
+
+    try {
+      const data = await ApiAuth.verifyOtp(otpCorreoPendiente, codigo);
+      otpCorreoPendiente = null;
+      document.getElementById('otp-form').classList.add('hidden');
+      document.getElementById('login-form').classList.remove('hidden');
+      await completarLogin(data);
+    } catch (err) {
+      errorMsg.textContent = err.message;
+      errorEl.classList.remove('hidden');
+    } finally {
+      btnText.classList.remove('hidden');
+      btnLoad.classList.add('hidden');
+      document.getElementById('btn-otp').disabled = false;
     }
   });
 

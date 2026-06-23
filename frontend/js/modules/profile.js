@@ -2,6 +2,9 @@ import { Auth, ApiUsuarios } from '../api.js';
 import { makeBadge, showToast } from './ui.js';
 import { logout } from './auth.js';
 
+// Chat ID de Telegram actual del usuario (para detectar cambios al editar).
+let telegramChatIdActual = '';
+
 export async function loadProfile() {
   const user = Auth.user();
   if (!user) return;
@@ -15,6 +18,14 @@ export async function loadProfile() {
     document.getElementById('p-nombre').textContent  = perfil.nombre_usuario;
     document.getElementById('p-correo').textContent  = perfil.correo;
     document.getElementById('p-estado').innerHTML    = makeBadge(perfil.estado);
+
+    telegramChatIdActual = perfil.telegram_chat_id || '';
+    const telEl = document.getElementById('p-telegram');
+    if (telEl) {
+      telEl.innerHTML = telegramChatIdActual
+        ? makeBadge('Activa') + ` <span style="color:var(--text-secondary);font-size:0.8rem">(${telegramChatIdActual})</span>`
+        : '<span style="color:var(--text-secondary)">Desactivada</span>';
+    }
   } catch {}
 }
 
@@ -24,6 +35,8 @@ export function openEditProfileModal() {
   document.getElementById('edit-profile-name').value = document.getElementById('profile-name').textContent;
   document.getElementById('edit-profile-pass-current').value = '';
   document.getElementById('edit-profile-pass-new').value = '';
+  const telInput = document.getElementById('edit-profile-telegram');
+  if (telInput) telInput.value = telegramChatIdActual;
 }
 
 export function closeEditProfileModal() {
@@ -48,6 +61,16 @@ export async function submitEditProfile(event) {
   if (name && name !== document.getElementById('profile-name').textContent) {
     datos.nombre_usuario = name;
   }
+
+  // Telegram 2FA: solo enviar si cambió (cadena vacía = desvincular).
+  const telInput = document.getElementById('edit-profile-telegram');
+  if (telInput) {
+    const telNuevo = telInput.value.trim();
+    if (telNuevo !== telegramChatIdActual) {
+      datos.telegram_chat_id = telNuevo;
+    }
+  }
+
   if (passNew) {
     if (!passCurrent) {
       errMsg.textContent = 'Debes ingresar tu contraseña actual para cambiarla.';
@@ -79,7 +102,16 @@ export async function submitEditProfile(event) {
       document.getElementById('profile-name').textContent = resp.nombre_usuario;
       document.getElementById('p-nombre').textContent = resp.nombre_usuario;
       document.getElementById('nav-username').textContent = resp.nombre_usuario;
-      
+
+      // Refrescar el estado de Telegram 2FA mostrado en la tarjeta.
+      telegramChatIdActual = resp.telegram_chat_id || '';
+      const telEl = document.getElementById('p-telegram');
+      if (telEl) {
+        telEl.innerHTML = telegramChatIdActual
+          ? makeBadge('Activa') + ` <span style="color:var(--text-secondary);font-size:0.8rem">(${telegramChatIdActual})</span>`
+          : '<span style="color:var(--text-secondary)">Desactivada</span>';
+      }
+
       const user = Auth.user();
       if (user) {
         user.nombre_usuario = resp.nombre_usuario;

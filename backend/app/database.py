@@ -63,3 +63,6 @@ def get_db():
         yield db
     finally:
         db.close()
+
+from app import models
+models.Base.metadata.create_all(bind=engine)

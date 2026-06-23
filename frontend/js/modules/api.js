@@ -83,8 +83,10 @@ export async function apiFetch(path, options = {}) {
 
 /** Authentication endpoints @namespace */
 export const ApiAuth = {
-  /** @returns {Promise<Object>} */
+  /** @returns {Promise<Object>} Devuelve el token, o `{otp_required:true}` si el usuario tiene 2FA. */
   login: (correo, password) => apiFetch('/auth/login', { method: 'POST', body: JSON.stringify({ correo, password }) }),
+  /** @returns {Promise<Object>} Verifica el OTP recibido por Telegram y devuelve el token. */
+  verifyOtp: (correo, codigo) => apiFetch('/auth/verify-otp', { method: 'POST', body: JSON.stringify({ correo, codigo }) }),
   /** @returns {Promise<Object>} */
   logout: () => apiFetch('/auth/logout', { method: 'POST' }),
 };

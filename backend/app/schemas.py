@@ -52,6 +52,22 @@ class TokenPayload(BaseModel):
     exp: Optional[datetime] = None
 
 
+class OTPRequiredResponse(BaseModel):
+    """
+    Respuesta del login cuando el usuario tiene 2FA por Telegram.
+    No contiene token: el cliente debe verificar el OTP con /auth/verify-otp.
+    """
+    otp_required: bool = True
+    correo: str
+    mensaje: str = "Te enviamos un código de verificación por Telegram."
+
+
+class VerifyOTPRequest(BaseModel):
+    """Schema para verificar el código OTP y completar el inicio de sesión."""
+    correo: str = Field(..., max_length=150)
+    codigo: str = Field(..., min_length=4, max_length=10, description="Código recibido por Telegram")
+
+
 # ===========================================================================
 # USUARIOS
 # ===========================================================================
@@ -94,6 +110,7 @@ class UsuarioUpdatePerfil(BaseModel):
     nombre_usuario: Optional[str] = Field(None, max_length=100)
     password_actual: Optional[str] = None
     password_nuevo: Optional[str] = Field(None, min_length=8)
+    telegram_chat_id: Optional[str] = Field(None, max_length=50, description="Chat ID de Telegram para 2FA. Cadena vacía para desvincular.")
 
     @field_validator('password_nuevo')
     @classmethod
@@ -114,6 +131,7 @@ class UsuarioResponse(BaseModel):
     nombre_usuario: str
     correo: str
     estado: str
+    telegram_chat_id: Optional[str] = None
     ultimo_acceso: Optional[datetime] = None
     fecha_creacion: datetime
 

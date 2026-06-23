@@ -59,6 +59,7 @@ class Usuario(Base):
     nombre_usuario= Column(String(100), nullable=False)
     correo        = Column(String(150), unique=True, nullable=False, index=True)
     password_hash = Column(String(255), nullable=False)
+    telegram_chat_id = Column(String(50), nullable=True)  # Chat de Telegram para 2FA (OTP). NULL = sin OTP.
     estado        = Column(
         Enum("activo", "bloqueado", "inactivo", name="estado_usuario"),
         default="activo", nullable=False
@@ -75,6 +76,7 @@ class Usuario(Base):
     descargas     = relationship("Descarga", back_populates="usuario")
     sesiones      = relationship("Sesion", back_populates="usuario")
     logs          = relationship("LogSeguridad", back_populates="usuario")
+    codigos_otp   = relationship("CodigoOTP", back_populates="usuario")
 
 
 # ---------------------------------------------------------------------------
@@ -401,3 +403,30 @@ class TicketSoporte(Base):
     fecha_cierre   = Column(DateTime, nullable=True)
 
     usuario = relationship("Usuario", backref="tickets_soporte")
+
+
+# ---------------------------------------------------------------------------
+# Código OTP (2FA por Telegram)
+# ---------------------------------------------------------------------------
+
+class CodigoOTP(Base):
+    """
+    Modelo de la tabla 'codigos_otp'.
+    Almacena los códigos de un solo uso (One-Time Password) que se envían por
+    Telegram durante el inicio de sesión de los usuarios con 2FA habilitado.
+    El código se guarda hasheado (bcrypt), nunca en texto plano.
+    """
+    __tablename__ = "codigos_otp"
+
+    id_otp           = Column(Integer, primary_key=True, autoincrement=True)
+    id_usuario       = Column(Integer, ForeignKey("usuarios.id_usuario"), nullable=False)
+    codigo_hash      = Column(String(255), nullable=False)
+    estado           = Column(
+        Enum("pendiente", "usado", "expirado", name="estado_otp"),
+        default="pendiente", nullable=False
+    )
+    intentos         = Column(Integer, default=0, nullable=False)
+    fecha_creacion   = Column(DateTime, default=datetime.utcnow, nullable=False)
+    fecha_expiracion = Column(DateTime, nullable=False)
+
+    usuario = relationship("Usuario", back_populates="codigos_otp")

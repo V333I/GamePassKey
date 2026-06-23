@@ -60,6 +60,19 @@ def actualizar_mi_perfil(
     if datos.nombre_usuario and datos.nombre_usuario.strip():
         usuario.nombre_usuario = datos.nombre_usuario.strip()
 
+    # Vincular / desvincular Telegram para el 2FA (OTP).
+    if datos.telegram_chat_id is not None:
+        chat_id = datos.telegram_chat_id.strip()
+        if chat_id == "":
+            usuario.telegram_chat_id = None  # Desvincular -> login sin OTP
+        elif not chat_id.lstrip("-").isdigit():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="El Chat ID de Telegram debe ser numérico (ej. 123456789).",
+            )
+        else:
+            usuario.telegram_chat_id = chat_id
+
     db.commit()
     db.refresh(usuario)
     registrar_log(db, "ACTUALIZAR_PERFIL", "El usuario actualizó su perfil.", id_usuario=usuario.id_usuario)

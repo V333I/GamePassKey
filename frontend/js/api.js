@@ -131,6 +131,15 @@ export const ApiAuth = {
    */
   login: (correo, password) =>
     apiFetch('/auth/login', { method: 'POST', body: JSON.stringify({ correo, password }) }),
+
+  /**
+   * Verifica el código OTP recibido por Telegram y completa el inicio de sesión.
+   * @param {string} correo - The user's email.
+   * @param {string} codigo - The OTP code received via Telegram.
+   * @returns {Promise<Object>} The authentication token and user data.
+   */
+  verifyOtp: (correo, codigo) =>
+    apiFetch('/auth/verify-otp', { method: 'POST', body: JSON.stringify({ correo, codigo }) }),
 };
 
 // ── Juegos ────────────────────────────────────────────────────────
