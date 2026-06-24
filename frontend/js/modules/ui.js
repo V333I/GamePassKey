@@ -128,8 +128,8 @@ export function initSearchFilter() {
 export function generateCover(title, index, coverUrl) {
   if (coverUrl) {
     return `
-      <div style="position: absolute; inset: -20px; background-image: url('${coverUrl}'); background-size: cover; background-position: center; filter: blur(15px); opacity: 0.4; z-index: 0;"></div>
-      <img src="${coverUrl}" class="game-cover-img" alt="" aria-label="${title}" onerror="this.style.opacity='0'; this.style.visibility='hidden';" style="position: relative; z-index: 1; object-fit: contain; color: transparent;" />
+      <div style="position: absolute; inset: -20px; background-image: url('${escapeHTML(coverUrl)}'); background-size: cover; background-position: center; filter: blur(15px); opacity: 0.4; z-index: 0;"></div>
+      <img src="${escapeHTML(coverUrl)}" class="game-cover-img" alt="" aria-label="${escapeHTML(title)}" onerror="this.style.opacity='0'; this.style.visibility='hidden';" style="position: relative; z-index: 1; object-fit: contain; color: transparent;" />
     `;
   }
   const pal = COVER_PALETTES[index % COVER_PALETTES.length];
@@ -206,7 +206,7 @@ export function buildGameCard(juego, idx, context = 'library') {
 export async function openGameModal(juego, idx, context = 'library') {
   document.getElementById('modal-cover').innerHTML = generateCover(juego.titulo, idx, juego.imagen_portada);
   document.getElementById('modal-genres').innerHTML = juego.genero
-    ? juego.genero.split(',').map(g => `<span class="badge badge-maintenance">${g.trim()}</span>`).join('')
+    ? juego.genero.split(',').map(g => `<span class="badge badge-maintenance">${escapeHTML(g.trim())}</span>`).join('')
     : '';
   document.getElementById('modal-title').textContent  = juego.titulo;
   document.getElementById('modal-desc').textContent   = juego.descripcion || 'Sin descripción disponible.';

@@ -1,5 +1,5 @@
 import { ApiDispositivos } from '../api.js';
-import { makeBadge, showToast } from './ui.js';
+import { makeBadge, showToast, escapeHTML } from './ui.js';
 
 export async function loadDevices() {
   const list = document.getElementById('devices-list');
@@ -34,8 +34,8 @@ export async function loadDevices() {
       item.className = 'list-item';
       item.innerHTML = `
         <div class="list-item-left">
-          <div class="list-item-title">${d.nombre_dispositivo || 'Dispositivo sin nombre'}</div>
-          <div class="list-item-sub">${d.sistema_operativo || '—'} · HW: ${d.hardware_id.slice(0, 20)}…</div>
+          <div class="list-item-title">${escapeHTML(d.nombre_dispositivo) || 'Dispositivo sin nombre'}</div>
+          <div class="list-item-sub">${escapeHTML(d.sistema_operativo) || '—'} · HW: ${escapeHTML(d.hardware_id).slice(0, 20)}…</div>
         </div>
         <div class="list-item-right">
           <div class="info-pair">

@@ -1,5 +1,5 @@
 import { ApiLicencias, ApiJuegos } from '../api.js';
-import { makeBadge } from './ui.js';
+import { makeBadge, escapeHTML } from './ui.js';
 
 export async function loadLicenses() {
   const list = document.getElementById('licenses-list');
@@ -30,9 +30,9 @@ export async function loadLicenses() {
       const juego = gamesMap[lic.id_juego];
       item.innerHTML = `
         <div class="list-item-left">
-          <div class="list-item-icon">${juego ? juego.titulo.slice(0,2).toUpperCase() : 'GP'}</div>
+          <div class="list-item-icon">${juego ? escapeHTML(juego.titulo).slice(0,2).toUpperCase() : 'GP'}</div>
           <div>
-            <div class="list-item-title">${juego ? juego.titulo : `Juego #${lic.id_juego}`}</div>
+            <div class="list-item-title">${juego ? escapeHTML(juego.titulo) : `Juego #${lic.id_juego}`}</div>
             <div class="list-item-sub" style="font-family:var(--font-mono);font-size:0.72rem">${lic.clave_licencia}</div>
           </div>
         </div>

@@ -1,5 +1,5 @@
 import { apiFetch } from '../api.js';
-import { showToast } from './ui.js';
+import { showToast, escapeHTML } from './ui.js';
 import { openRedeemModal } from './library.js';
 
 export let notificacionesActivas = [];
@@ -65,10 +65,10 @@ export function renderNotifications() {
     return `
       <div class="notification-item ${n.leida ? 'read' : 'unread'}" style="padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer;" onclick="window.markAsRead(${n.id_notificacion}, this)">
         <div style="display:flex; justify-content:space-between; margin-bottom:5px;">
-          <strong style="color: ${n.leida ? 'var(--text-muted)' : 'var(--accent-blue)'};">${n.titulo}</strong>
+          <strong style="color: ${n.leida ? 'var(--text-muted)' : 'var(--accent-blue)'};">${escapeHTML(n.titulo)}</strong>
           ${!n.leida ? '<span style="width:8px;height:8px;background:var(--accent-orange);border-radius:50%;display:inline-block;"></span>' : ''}
         </div>
-        <p style="font-size:0.85rem; color:var(--text-secondary); margin:0; line-height: 1.4;">${n.mensaje}</p>
+        <p style="font-size:0.85rem; color:var(--text-secondary); margin:0; line-height: 1.4;">${escapeHTML(n.mensaje)}</p>
         ${codeHtml}
         <div style="font-size:0.7rem; color:var(--text-muted); margin-top:8px;">
           ${new Date(n.fecha_creacion).toLocaleString('es')}
