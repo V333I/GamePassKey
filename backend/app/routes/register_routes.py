@@ -4,12 +4,14 @@ Permite que nuevos usuarios creen una cuenta con rol 'cliente'.
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy.orm import Session
+import re
 
 from app.auth import crear_token_acceso, generar_hash_password
 from app.database import get_db
-from app.dependencies import registrar_log
+from app.dependencies import registrar_log, check_rate_limit
+from app.limiter import limiter
 from app.models import Rol, Usuario
 from app.schemas import TokenResponse
 
@@ -21,14 +23,23 @@ router_register = APIRouter(prefix="/auth", tags=["Autenticación"])
 class RegisterRequest(BaseModel):
     nombre_usuario: str = Field(..., min_length=2, max_length=100, description="Nombre de display")
     correo: str         = Field(..., max_length=150, description="Correo electrónico")
-    password: str       = Field(..., min_length=6, description="Contraseña (mín. 6 caracteres)")
+    password: str       = Field(..., min_length=8, description="Contraseña (mín. 8 caracteres, mayúscula y número)")
+
+    @field_validator('password')
+    @classmethod
+    def validar_password_fuerte(cls, v: str) -> str:
+        if not re.search(r'[A-Z]', v):
+            raise ValueError('La contraseña debe contener al menos una letra mayúscula.')
+        if not re.search(r'\d', v):
+            raise ValueError('La contraseña debe contener al menos un número.')
+        return v
 
     model_config = {
         "json_schema_extra": {
             "example": {
                 "nombre_usuario": "Juan Pérez",
                 "correo": "juan@ejemplo.com",
-                "password": "miClave123",
+                "password": "MiClaveSegura123",
             }
         }
     }
@@ -46,10 +57,12 @@ class RegisterRequest(BaseModel):
         "Devuelve un token JWT listo para usar, igual que el login."
     ),
 )
+@limiter.limit("5/minute")
 def register(
     datos: RegisterRequest,
     request: Request,
     db: Session = Depends(get_db),
+    rate_limit: bool = Depends(check_rate_limit("REGISTRO_FALLIDO")),
 ):
     """
     Proceso de registro:

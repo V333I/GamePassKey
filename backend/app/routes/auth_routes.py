@@ -205,8 +205,18 @@ def login(datos: LoginRequest, request: Request, db: Session = Depends(get_db), 
         db.query(Usuario).filter(Usuario.correo == datos.correo.lower().strip()).first()
     )
 
-    # Validar existencia y contraseña
-    if usuario is None or not verificar_password(datos.password, usuario.password_hash):
+    # Dummy hash de bcrypt para mitigar Timing Attacks (cost 12)
+    DUMMY_HASH = "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjIQqiRQYq"
+
+    # Validar existencia y contraseña con tiempo constante
+    usuario_valido = False
+    if usuario is not None:
+        usuario_valido = verificar_password(datos.password, usuario.password_hash)
+    else:
+        # Si no existe, simulamos la misma carga criptográfica para no dar pistas
+        verificar_password(datos.password, DUMMY_HASH)
+
+    if not usuario_valido:
         registrar_log(
             db, accion="LOGIN_FALLIDO",
             descripcion=f"Intento fallido para correo: {datos.correo}",
@@ -276,6 +286,7 @@ def verify_otp(datos: VerifyOTPRequest, request: Request, db: Session = Depends(
         db.query(CodigoOTP)
         .filter(CodigoOTP.id_usuario == usuario.id_usuario, CodigoOTP.estado == "pendiente")
         .order_by(CodigoOTP.id_otp.desc())
+        .with_for_update()
         .first()
     )
 
