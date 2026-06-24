@@ -16,9 +16,12 @@ backend/
 │   ├── models.py        ← Modelos ORM (tablas de la BD)
 │   ├── schemas.py       ← Schemas Pydantic (validación de datos)
 │   ├── auth.py          ← Hash de contraseñas y generación de JWT
+│   ├── telegram_service.py ← Envío de códigos OTP vía Bot API de Telegram (2FA)
 │   └── routes/
 │       ├── __init__.py
-│       └── auth_routes.py  ← Rutas de autenticación
+│       └── auth_routes.py  ← Rutas de autenticación (login, verify-otp, logout)
+├── sql/
+│   └── otp_telegram.sql ← Script manual: tabla codigos_otp + columna telegram_chat_id
 ├── .env.example         ← Plantilla de variables de entorno
 ├── requirements.txt     ← Dependencias Python
 └── README.md            ← Este archivo
@@ -90,6 +93,9 @@ DB_NAME=gamepasskey
 SECRET_KEY=genera_una_clave_con_el_comando_de_abajo
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=60
+
+# 2FA por Telegram — token del bot de @BotFather (vacío = 2FA deshabilitado)
+TELEGRAM_BOT_TOKEN=
 ```
 
 ### Generar una `SECRET_KEY` segura
@@ -123,6 +129,13 @@ O ejecutar desde la terminal (con el venv activado):
 
 ```bash
 python -c "from app.database import engine; from app.models import Base; Base.metadata.create_all(bind=engine)"
+```
+
+Para el **2FA por Telegram**, ejecuta además (una sola vez) el script que crea la
+tabla `codigos_otp` y la columna `usuarios.telegram_chat_id`:
+
+```bash
+mysql -u root -p gamepasskey < sql/otp_telegram.sql
 ```
 
 ---
@@ -208,6 +221,22 @@ curl -X POST "http://localhost:8000/auth/login" \
 | `SECRET_KEY`                | Clave secreta para firmar JWT             | —                 |
 | `ALGORITHM`                 | Algoritmo JWT                             | `HS256`           |
 | `ACCESS_TOKEN_EXPIRE_MINUTES` | Duración del token en minutos           | `60`              |
+| `TELEGRAM_BOT_TOKEN`        | Token del bot de Telegram para el 2FA (OTP) | — (opcional)   |
+
+---
+
+## Verificación en dos pasos (2FA por Telegram)
+
+Si un usuario tiene su `telegram_chat_id` vinculado, el login se vuelve de dos pasos:
+
+1. `POST /auth/login` valida correo + contraseña y, en lugar del token, envía un
+   código OTP de 6 dígitos por Telegram y responde `{ "otp_required": true }`.
+2. `POST /auth/verify-otp` (`{correo, codigo}`) valida el código y devuelve el JWT.
+
+El OTP se guarda hasheado en `codigos_otp`, caduca a los 5 minutos, admite hasta 5
+intentos y el envío es *fail-closed* (si Telegram falla, el login responde 503).
+Requisitos: ejecutar `sql/otp_telegram.sql`, definir `TELEGRAM_BOT_TOKEN` y que cada
+usuario vincule su Chat ID. **Guía paso a paso:** ver `OTP_TELEGRAM.md` en la raíz.
 
 ---
 
@@ -215,7 +244,7 @@ curl -X POST "http://localhost:8000/auth/login" \
 
 La API está dividida en los siguientes módulos principales, todos completamente funcionales:
 
-- **`routes/auth_routes.py`** — Autenticación y gestión de sesiones (JWT).
+- **`routes/auth_routes.py`** — Autenticación y gestión de sesiones (JWT), incluyendo el 2FA por Telegram (`/auth/login` + `/auth/verify-otp`).
 - **`routes/juegos_routes.py`** — Catálogo de juegos (CRUD para administradores, listado para usuarios).
 - **`routes/biblioteca_routes.py`** — Gestión de la biblioteca de juegos de cada usuario.
 - **`routes/licencias_routes.py`** — Sistema de licencias y seriales para validación.

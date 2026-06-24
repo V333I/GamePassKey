@@ -165,8 +165,17 @@ Con el backend arriba, abre `http://localhost:8000/docs`:
 
 ---
 
-## Limitación conocida
+## 2FA en el launcher de escritorio
 
-El **launcher de escritorio** no implementa el segundo paso (OTP). Si una cuenta
-activa el 2FA, su inicio de sesión en el launcher dejará de funcionar (recibe
-`otp_required` sin token). El 2FA, por ahora, está pensado solo para el portal web.
+El **launcher de escritorio** también soporta el segundo paso. Si la cuenta tiene
+Telegram vinculado, al pulsar **ENTRAR** el launcher detecta la respuesta
+`otp_required`, muestra una pantalla para introducir el **código de 6 dígitos** y
+lo verifica contra `/auth/verify-otp`. Si el código es correcto, continúa con la
+validación del HWID y abre la biblioteca como siempre.
+
+- El enlace **← Volver al inicio de sesión** cancela el OTP y regresa al login.
+- Las mismas reglas aplican (caducidad de 5 min, máximo de intentos): si el código
+  expira o se agotan los intentos, vuelve a iniciar sesión para recibir uno nuevo.
+- Requiere que el backend tenga `TELEGRAM_BOT_TOKEN` configurado, igual que el portal web.
+
+> Las cuentas **sin** Telegram vinculado siguen entrando en un solo paso.

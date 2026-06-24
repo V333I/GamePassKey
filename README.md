@@ -8,10 +8,11 @@
 
 ### 👤 Portal del Usuario
 - **Autenticación Segura**: Sistema de Login y Registro protegido mediante JSON Web Tokens (JWT).
+- **Verificación en Dos Pasos (2FA por Telegram)**: Opcionalmente, cada usuario puede vincular su Telegram para que, en cada inicio de sesión, reciba un código OTP de un solo uso a través de un bot. El código se guarda hasheado, caduca a los 5 minutos y admite un número limitado de intentos.
 - **Catálogo Inteligente**: Visualización ordenada alfabéticamente de todos los títulos. Si el usuario ya posee un juego, el botón de solicitud se bloquea automáticamente mostrando "YA EN BIBLIOTECA".
 - **Mi Biblioteca**: Espacio personal ordenado alfabéticamente donde se alojan los juegos a los que el usuario tiene acceso.
 - **Canje de Códigos**: Sistema integrado para activar códigos de un solo uso y añadir juegos a la biblioteca de forma instantánea.
-- **Gestión de Perfil**: Edición de nombre de usuario y contraseña.
+- **Gestión de Perfil**: Edición de nombre de usuario, contraseña y vinculación de Telegram para la verificación en dos pasos (Chat ID).
 - **Gestión de Dispositivos**: Registro y vinculación de equipos autorizados mediante Hardware ID (Límite máximo de 2 dispositivos por usuario).
 - **Centro de Notificaciones**: Bandeja de notificaciones integrada para recibir respuestas del administrador, códigos de activación y cambios de estado.
 - **Sistema de Soporte**: Creación de tickets de soporte técnico o peticiones administrativas.
@@ -28,6 +29,7 @@
 
 ### 🖥️ Launcher de Escritorio (Desktop App)
 - **Diseño Dark Tech**: Interfaz inmersiva con colores oscuros y acentos vibrantes que unifican la experiencia con el portal web.
+- **Verificación en Dos Pasos (2FA por Telegram)**: Si la cuenta tiene Telegram vinculado, el launcher solicita el código OTP en un segundo paso antes de entrar, igual que el portal web.
 - **Validación HWID Automática**: El launcher valida silenciosamente la máquina del usuario en cada inicio de sesión.
 - **Grilla Responsiva**: Los juegos instalados se distribuyen dinámicamente ocupando el 100% de la ventana sin importar la resolución del monitor.
 - **Simulador de Ejecución**: Lanza juegos directamente desde el cliente con aislamiento de procesos.
@@ -43,6 +45,7 @@
 - **MySQL / PyMySQL**: Motor de base de datos relacional.
 - **Seguridad Avanzada (Stateful JWT)**: Sistema de sesiones respaldado en base de datos. Permite revocar accesos en tiempo real y rastrear IPs/Dispositivos, superando las limitaciones de los JWT tradicionales (stateless).
 - **PyJWT & Passlib**: Para la autenticación y encriptación de contraseñas (Bcrypt).
+- **2FA por Telegram**: Integración con la Bot API de Telegram (vía `requests`) para enviar códigos OTP de un solo uso durante el login.
 - **Uvicorn**: Servidor ASGI para despliegue.
 
 ### Frontend
@@ -69,6 +72,10 @@
 1. Inicia tu servidor MySQL.
 2. Crea una base de datos vacía, por ejemplo: `gamepasskey`.
 3. *(Opcional)* Si cuentas con el volcado SQL del proyecto, impórtalo. De lo contrario, SQLAlchemy creará las tablas automáticamente al iniciar el servidor (si está configurado con `Base.metadata.create_all`).
+4. **2FA por Telegram**: ejecuta una sola vez el script que crea la tabla de códigos OTP y la columna de vinculación:
+   ```bash
+   mysql -u root -p gamepasskey < backend/sql/otp_telegram.sql
+   ```
 
 ### 2. Configuración del Backend
 Navega a la carpeta del backend:
@@ -92,7 +99,11 @@ DB_NAME=gamepasskey
 SECRET_KEY=tu_clave_secreta_super_segura
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=120
+
+# 2FA por Telegram — token del bot generado con @BotFather (déjalo vacío para deshabilitar)
+TELEGRAM_BOT_TOKEN=
 ```
+> Para activar el 2FA, crea un bot con **@BotFather**, pega su token en `TELEGRAM_BOT_TOKEN`, y cada usuario debe vincular su **Chat ID** (lo obtiene con **@userinfobot**) desde *Mi Perfil → Editar Perfil*. Recuerda iniciar el chat con tu bot (`/start`) para que pueda enviarte mensajes.
 
 Levanta el servidor con Uvicorn:
 ```bash
@@ -132,8 +143,10 @@ Si acabas de inicializar la base de datos con los datos semilla, puedes acceder 
 
 ```text
 GamePassKey/
+├── OTP_TELEGRAM.md       # Guía detallada para configurar y probar el 2FA por Telegram
 ├── backend/
-│   ├── app/              # Código fuente de FastAPI
+│   ├── app/              # Código fuente de FastAPI (incluye telegram_service.py)
+│   ├── sql/              # Scripts SQL manuales (ej. otp_telegram.sql)
 │   ├── .env.example      # Plantilla de variables de entorno
 │   └── requirements.txt  # Dependencias del backend
 ├── frontend/

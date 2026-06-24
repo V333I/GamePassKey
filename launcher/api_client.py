@@ -21,13 +21,36 @@ def login(correo: str, password: str) -> Dict[str, Any]:
     url = f"{BASE_URL}/auth/login"
     data = {"correo": correo, "password": password}
     response = requests.post(url, json=data)
-    
+
     if response.status_code == 200:
-        data = response.json()
-        set_token(data.get("access_token"))
-        return data
+        result = response.json()
+        # Si el usuario tiene 2FA por Telegram vinculado, el backend NO devuelve
+        # token todavía: responde {otp_required: true} y hay que verificar el
+        # código con verify_otp(). En ese caso aún no fijamos el token.
+        if result.get("otp_required"):
+            return result
+        set_token(result.get("access_token"))
+        return result
     else:
         raise Exception(response.json().get("detail", "Error de autenticación"))
+
+
+def verify_otp(correo: str, codigo: str) -> Dict[str, Any]:
+    """
+    Segundo paso del login con 2FA. Envía el código OTP recibido por Telegram a
+    /auth/verify-otp y, si es correcto, fija el token y devuelve los datos del
+    usuario (mismo formato que un login normal).
+    """
+    url = f"{BASE_URL}/auth/verify-otp"
+    data = {"correo": correo, "codigo": codigo}
+    response = requests.post(url, json=data)
+
+    if response.status_code == 200:
+        result = response.json()
+        set_token(result.get("access_token"))
+        return result
+    else:
+        raise Exception(response.json().get("detail", "Código incorrecto o solicitud inválida."))
 
 def get_library() -> list:
     url_lib = f"{BASE_URL}/biblioteca/mi-biblioteca"

@@ -29,6 +29,7 @@ frontend/
 
 1. **Diseño "Glassmorphism" Moderno**: Interfaz altamente estética con paleta de colores oscuros, desenfoques y acentos en tonos cian y naranja.
 2. **Sistema de Autenticación**: Login, registro y cierre de sesión con tokens JWT almacenados de forma segura en `localStorage`.
+   - **Verificación en dos pasos (2FA) opcional**: si el usuario vinculó su Telegram, tras introducir sus credenciales aparece un segundo paso para ingresar el código OTP recibido por el bot (`/auth/verify-otp`). La vinculación del Chat ID se gestiona desde *Mi Perfil → Editar Perfil*.
 3. **Roles y Permisos**: Redirecciones automáticas basadas en el rol del usuario (Administrador vs Usuario estándar).
 4. **Catálogo y Biblioteca Dinámica**: 
    - Grid de juegos con filtrado por estado (Todos / Disponibles).

@@ -33,6 +33,9 @@ node_modules/
 npm-debug.log
 yarn-error.log
 
+# Notas internas / asistentes (no publicar)
+CLAUDE.md
+
 # Editores e IDEs
 .vscode/
 .idea/
