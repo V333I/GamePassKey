@@ -43,6 +43,9 @@ def registrar_dispositivo(
     usuario: Usuario = Depends(get_current_user),
 ):
     """Registra un nuevo dispositivo para el usuario autenticado (máx 2)."""
+    # Bloqueo a nivel de usuario para evitar bypass por condiciones de carrera (Race Conditions)
+    db.query(Usuario).filter(Usuario.id_usuario == usuario.id_usuario).with_for_update().first()
+
     # Verificar límite de 2 dispositivos
     activos = db.query(Dispositivo).filter(
         Dispositivo.id_usuario == usuario.id_usuario,

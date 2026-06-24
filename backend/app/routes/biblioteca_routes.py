@@ -37,6 +37,9 @@ def agregar_a_biblioteca(
     usuario: Usuario = Depends(get_current_user),
 ):
     """Agrega un juego a la biblioteca del usuario usando una licencia válida."""
+    # Bloqueo a nivel de usuario para evitar duplicaciones por Race Conditions
+    db.query(Usuario).filter(Usuario.id_usuario == usuario.id_usuario).with_for_update().first()
+
     # Verificar que el juego existe
     juego = db.query(Juego).filter(Juego.id_juego == datos.id_juego).first()
     if not juego:

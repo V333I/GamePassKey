@@ -86,8 +86,8 @@ def usar_codigo(
     """Canjea un código de uso único. Asigna la licencia al usuario y agrega el juego a su biblioteca."""
     from datetime import datetime, timezone
 
-    # 1. Buscar el código
-    codigo = db.query(CodigoUsoUnico).filter(CodigoUsoUnico.codigo == datos.codigo).first()
+    # 1. Buscar el código (bloqueando la fila para evitar Race Conditions)
+    codigo = db.query(CodigoUsoUnico).filter(CodigoUsoUnico.codigo == datos.codigo).with_for_update().first()
     if not codigo:
         registrar_log(db, "CANJEAR_CODIGO_FALLIDO", f"Intento de canjear código inexistente: {datos.codigo}", id_usuario=usuario.id_usuario, ip_origen=request.client.host if request.client else None, nivel="advertencia")
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Código no encontrado.")
