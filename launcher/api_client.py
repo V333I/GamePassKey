@@ -90,7 +90,7 @@ def register_device(hwid: str, os_info: str) -> Dict[str, Any]:
     }
     response = requests.post(url, json=data, headers=get_headers())
     
-    if response.status_code == 200:
+    if response.status_code in (200, 201):
         return response.json()
     else:
         raise Exception(response.json().get("detail", "Error al registrar el dispositivo"))

@@ -60,7 +60,13 @@ class LibraryFrame(ctk.CTkFrame):
         self.load_label.configure(text=f"Error: {msg}", text_color="#ff4444")
 
     def _render_games(self, library_items):
-        self.load_label.destroy()
+        if not self.winfo_exists() or not hasattr(self, 'games_grid') or not self.games_grid.winfo_exists():
+            return
+
+        try:
+            self.load_label.destroy()
+        except:
+            pass
         
         if not library_items:
             ctk.CTkLabel(self.games_grid, text="Tu biblioteca está vacía.", text_color="gray").grid(row=0, column=0)
