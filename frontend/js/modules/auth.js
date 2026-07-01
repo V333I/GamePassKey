@@ -87,6 +87,13 @@ export function initAuth() {
     const btnLoad  = document.querySelector('#btn-login .btn-loader');
 
     errorEl.classList.add('hidden');
+    
+    if (!correo || !password) {
+      errorMsg.textContent = 'Por favor, completa ambos campos antes de continuar.';
+      errorEl.classList.remove('hidden');
+      return;
+    }
+
     btnText.classList.add('hidden');
     btnLoad.classList.remove('hidden');
     document.getElementById('btn-login').disabled = true;
