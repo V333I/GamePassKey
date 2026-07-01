@@ -111,6 +111,11 @@ export async function apiFetch(path, options = {}) {
       }
     }
     
+    if (res.status === 403 && (msg.toLowerCase().includes('inactiva') || msg.toLowerCase().includes('bloqueada'))) {
+      Auth.clear();
+      if (window.showLogin) window.showLogin();
+    }
+    
     throw new Error(msg);
   }
 
@@ -140,6 +145,12 @@ export const ApiAuth = {
    */
   verifyOtp: (correo, codigo) =>
     apiFetch('/auth/verify-otp', { method: 'POST', body: JSON.stringify({ correo, codigo }) }),
+
+  recuperarPassword: (correo) =>
+    apiFetch('/auth/recuperar-password', { method: 'POST', body: JSON.stringify({ correo }) }),
+
+  resetPassword: (correo, codigo, nueva_password) =>
+    apiFetch('/auth/reset-password', { method: 'POST', body: JSON.stringify({ correo, codigo, nueva_password }) }),
 };
 
 // ── Juegos ────────────────────────────────────────────────────────

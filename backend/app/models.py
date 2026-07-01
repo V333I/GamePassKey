@@ -423,6 +423,10 @@ class CodigoOTP(Base):
     id_otp           = Column(Integer, primary_key=True, autoincrement=True)
     id_usuario       = Column(Integer, ForeignKey("usuarios.id_usuario"), nullable=False)
     codigo_hash      = Column(String(255), nullable=False)
+    proposito        = Column(
+        Enum("login", "recuperacion", name="proposito_otp"),
+        default="login", nullable=False
+    )
     estado           = Column(
         Enum("pendiente", "usado", "expirado", name="estado_otp"),
         default="pendiente", nullable=False

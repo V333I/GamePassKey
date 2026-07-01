@@ -75,6 +75,18 @@ def enviar_otp_telegram(chat_id: str, codigo: str, minutos_validez: int) -> None
     )
     enviar_mensaje_telegram(chat_id, mensaje)
 
+def enviar_recuperacion_telegram(chat_id: str, codigo: str, minutos_validez: int) -> None:
+    """
+    Envía un código OTP para recuperar contraseña.
+    """
+    mensaje = (
+        "⚠️ <b>GamePassKey — Recuperación de Contraseña</b>\n\n"
+        f"Tu código para restablecer la contraseña es: <b>{codigo}</b>\n\n"
+        f"Válido por {minutos_validez} minutos.\n"
+        "Si no solicitaste esto, alguien podría estar intentando acceder a tu cuenta."
+    )
+    enviar_mensaje_telegram(chat_id, mensaje)
+
 # --- TELEGRAM LONG POLLING PARA DEEP LINKING ---
 import threading
 import time

@@ -101,7 +101,7 @@
           </button>
 
           <div class="login-links">
-            <a href="#" class="link-subtle">¿Olvidó su contraseña?</a>
+            <a href="#" class="link-subtle" id="btn-recovery-link">¿Olvidó su contraseña?</a>
             <a href="#" class="link-subtle" onclick="openRegisterModal(); return false;">Crear cuenta</a>
           </div>
         </form>
@@ -734,6 +734,107 @@
           </div>
           <button type="submit" class="btn-primary" style="width:100%; margin-top:20px; padding:12px;">Enviar Mensaje</button>
         </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Recomendación 2FA -->
+  <div id="modal-recommend-2fa" class="modal-overlay hidden">
+    <div class="modal-card" style="max-width: 420px; border-top: 4px solid var(--accent);">
+      <button class="modal-close" onclick="document.getElementById('modal-recommend-2fa').classList.add('hidden')">✕</button>
+      <div class="modal-body" style="padding:36px 32px">
+        <div style="text-align:center;margin-bottom:24px">
+          <div style="width:56px;height:56px;margin:0 auto 14px;filter:drop-shadow(0 0 12px rgba(42, 170, 138, 0.5))">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M9 12l2 2 4-4"/></svg>
+          </div>
+          <h2 style="font-family:var(--font-display);font-size:1.2rem;color:#fff;margin-bottom:8px">Protege tu cuenta</h2>
+        </div>
+        <p style="font-size:0.9rem;color:var(--text-secondary);margin-bottom:16px;line-height:1.5;text-align:justify">
+          Hemos notado que <strong>no has activado el Doble Factor (2FA)</strong> por Telegram. Sin esta medida, tu aplicación no está del todo segura.
+        </p>
+        <ul style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:24px;line-height:1.6;padding-left:20px;">
+          <li>Obtendrás acceso para recuperar tu cuenta si olvidas la contraseña.</li>
+          <li>Evitarás el robo de tu cuenta por terceros.</li>
+          <li>Recibirás notificaciones de inicio de sesión.</li>
+        </ul>
+        
+        <div style="display:flex;gap:12px;flex-direction:column;">
+          <button onclick="document.getElementById('modal-recommend-2fa').classList.add('hidden'); switchSection('perfil');" class="btn-primary" style="width:100%;padding:12px;background:var(--accent);">
+            VINCULAR TELEGRAM AHORA
+          </button>
+          <button onclick="document.getElementById('modal-recommend-2fa').classList.add('hidden')" class="btn-secondary" style="width:100%;padding:12px;background:transparent;border:1px solid rgba(255,255,255,0.1);">
+            Lo haré más tarde
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Recuperación de Contraseña -->
+  <div id="modal-recovery" class="modal-overlay hidden" onclick="if(event.target===this)closeRecoveryModal()">
+    <div class="modal-card" style="max-width: 400px;">
+      <button class="modal-close" onclick="closeRecoveryModal()">✕</button>
+      <div class="modal-body" style="padding:36px 32px">
+        
+        <div style="text-align:center;margin-bottom:28px">
+          <div style="width:56px;height:56px;margin:0 auto 14px;filter:drop-shadow(0 0 12px rgba(0,212,255,0.5))">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#00d4ff" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <h2 style="font-family:var(--font-display);font-size:1.1rem;color:#fff;margin-bottom:6px">Recuperar Contraseña</h2>
+        </div>
+
+        <!-- Paso 1: Pedir Correo -->
+        <form id="recovery-step1-form" onsubmit="submitRecoveryStep1(event)">
+          <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:20px;line-height:1.4;text-align:center">
+            Ingresa tu correo. Si tienes Telegram vinculado, te enviaremos un código de restablecimiento.
+          </p>
+          <div class="form-group">
+            <div class="input-wrapper">
+              <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></span>
+              <input type="email" id="recovery-email" required placeholder="tu@correo.com" />
+              <div class="input-line"></div>
+            </div>
+          </div>
+          <div id="recovery-error-1" class="alert alert-error hidden" style="margin-top:15px;margin-bottom:0;">
+            <span id="recovery-error-msg-1">Error</span>
+          </div>
+          <button type="submit" id="btn-recovery-step1" class="btn-primary" style="width:100%;margin-top:20px;">
+            <span class="btn-text">ENVIAR CÓDIGO</span>
+            <span class="btn-loader hidden"><span class="spinner"></span></span>
+          </button>
+        </form>
+
+        <!-- Paso 2: Introducir Código y Nueva Contraseña -->
+        <form id="recovery-step2-form" class="hidden" onsubmit="submitRecoveryStep2(event)">
+          <p style="font-size:0.85rem;color:var(--text-secondary);margin-bottom:20px;line-height:1.4;text-align:center">
+            Ingresa el código que recibiste en Telegram y tu nueva contraseña.
+          </p>
+          
+          <div class="form-group">
+            <div class="input-wrapper">
+              <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span>
+              <input type="text" id="recovery-code" required placeholder="Código de 6 dígitos" inputmode="numeric" maxlength="6" style="letter-spacing:4px; font-weight:600; text-align:center;" />
+              <div class="input-line"></div>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top:20px;">
+            <div class="input-wrapper">
+              <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+              <input type="password" id="recovery-new-password" required placeholder="Nueva contraseña (mínimo 6)" />
+              <div class="input-line"></div>
+            </div>
+          </div>
+
+          <div id="recovery-error-2" class="alert alert-error hidden" style="margin-top:15px;margin-bottom:0;">
+            <span id="recovery-error-msg-2">Error</span>
+          </div>
+          <button type="submit" id="btn-recovery-step2" class="btn-primary" style="width:100%;margin-top:20px;">
+            <span class="btn-text">CAMBIAR CONTRASEÑA</span>
+            <span class="btn-loader hidden"><span class="spinner"></span></span>
+          </button>
+        </form>
+
       </div>
     </div>
   </div>

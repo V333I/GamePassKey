@@ -369,3 +369,96 @@ def logout(credentials = Depends(security), db: Session = Depends(get_db)):
             db.commit()
             
     return {"mensaje": "Sesión cerrada exitosamente."}
+
+# ---------------------------------------------------------------------------
+# RECUPERACIÓN DE CONTRASEÑA
+# ---------------------------------------------------------------------------
+
+class RecoveryRequest(BaseModel):
+    correo: EmailStr
+
+class ResetPasswordRequest(BaseModel):
+    correo: EmailStr
+    codigo: str = Field(..., min_length=6, max_length=6)
+    nueva_password: str = Field(..., min_length=6)
+
+@router.post("/recuperar-password", summary="Solicitar código de recuperación")
+@limiter.limit("5/minute")
+def solicitar_recuperacion(request: Request, body: RecoveryRequest, db: Session = Depends(get_db)):
+    usuario = db.query(Usuario).filter(Usuario.correo == body.correo).first()
+    if not usuario or usuario.estado != "activo":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cuenta no encontrada o inactiva."
+        )
+    if not usuario.telegram_chat_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="No tienes Telegram vinculado. Contacta a soporte para recuperar tu cuenta."
+        )
+        
+    codigo_plano = str(secrets.randbelow(900000) + 100000)
+    hash_codigo = generar_hash_password(codigo_plano)
+    
+    # Anular códigos de recuperación anteriores
+    db.query(CodigoOTP).filter(
+        CodigoOTP.id_usuario == usuario.id_usuario,
+        CodigoOTP.estado == "pendiente",
+        CodigoOTP.proposito == "recuperacion"
+    ).update({"estado": "expirado"})
+    
+    expiracion = datetime.now(timezone.utc) + timedelta(minutes=OTP_EXPIRA_MINUTOS)
+    
+    nuevo_otp = CodigoOTP(
+        id_usuario=usuario.id_usuario,
+        codigo_hash=hash_codigo,
+        proposito="recuperacion",
+        estado="pendiente",
+        intentos=0,
+        fecha_expiracion=expiracion
+    )
+    db.add(nuevo_otp)
+    db.commit()
+    
+    from app.telegram_service import enviar_recuperacion_telegram
+    enviar_recuperacion_telegram(usuario.telegram_chat_id, codigo_plano, OTP_EXPIRA_MINUTOS)
+    
+    return {"mensaje": "Código de recuperación enviado por Telegram."}
+
+@router.post("/reset-password", summary="Restablecer contraseña con código")
+@limiter.limit("5/minute")
+def reset_password(request: Request, body: ResetPasswordRequest, db: Session = Depends(get_db)):
+    usuario = db.query(Usuario).filter(Usuario.correo == body.correo).first()
+    if not usuario or usuario.estado != "activo":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cuenta no encontrada o inactiva."
+        )
+        
+    otp = db.query(CodigoOTP).filter(
+        CodigoOTP.id_usuario == usuario.id_usuario,
+        CodigoOTP.estado == "pendiente",
+        CodigoOTP.proposito == "recuperacion"
+    ).order_by(CodigoOTP.id_otp.desc()).first()
+    
+    if not otp:
+        raise HTTPException(status_code=400, detail="No hay ningún código de recuperación pendiente.")
+        
+    if otp.fecha_expiracion.replace(tzinfo=timezone.utc) < datetime.now(timezone.utc):
+        otp.estado = "expirado"
+        db.commit()
+        raise HTTPException(status_code=400, detail="El código ha expirado.")
+        
+    if not verificar_password(body.codigo, otp.codigo_hash):
+        otp.intentos += 1
+        if otp.intentos >= OTP_MAX_INTENTOS:
+            otp.estado = "expirado"
+        db.commit()
+        raise HTTPException(status_code=400, detail="Código incorrecto.")
+        
+    otp.estado = "usado"
+    usuario.password_hash = generar_hash_password(body.nueva_password)
+    db.commit()
+    
+    registrar_log(db, "PASSWORD_RESET", "El usuario restableció su contraseña por Telegram.", id_usuario=usuario.id_usuario)
+    return {"mensaje": "Contraseña restablecida correctamente. Ya puedes iniciar sesión."}

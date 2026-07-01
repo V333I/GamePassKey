@@ -37,6 +37,14 @@ async function completarLogin(data) {
   showDashboard();
   switchSection('biblioteca', document.querySelector('[onclick="switchSection(\\\'biblioteca\\\', this)"]'));
   loadLibrary();
+
+  // Show 2FA recommendation if Telegram is not linked
+  try {
+    const perfilInfo = await ApiUsuarios.miPerfil();
+    if (!perfilInfo.telegram_chat_id) {
+      document.getElementById('modal-recommend-2fa').classList.remove('hidden');
+    }
+  } catch(e) {}
 }
 
 /** Muestra el formulario de OTP y oculta el de login. */
@@ -63,6 +71,11 @@ export function cancelarOtp() {
  * @function initAuth
  */
 export function initAuth() {
+  document.getElementById('btn-recovery-link')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openRecoveryModal();
+  });
+
   document.getElementById('login-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -191,4 +204,91 @@ export async function logout() {
   document.getElementById('login-password').value = '';
   showToast('Sesión cerrada correctamente');
   showLogin();
+}
+
+// --- RECUPERACIÓN DE CONTRASEÑA ---
+
+let recoveryEmailPending = '';
+
+export function openRecoveryModal() {
+  document.getElementById('modal-recovery').classList.remove('hidden');
+  document.getElementById('recovery-step1-form').classList.remove('hidden');
+  document.getElementById('recovery-step2-form').classList.add('hidden');
+  document.getElementById('recovery-email').value = '';
+  document.getElementById('recovery-code').value = '';
+  document.getElementById('recovery-new-password').value = '';
+  document.getElementById('recovery-error-1').classList.add('hidden');
+  document.getElementById('recovery-error-2').classList.add('hidden');
+}
+
+export function closeRecoveryModal() {
+  document.getElementById('modal-recovery').classList.add('hidden');
+  recoveryEmailPending = '';
+}
+
+export async function submitRecoveryStep1(e) {
+  e.preventDefault();
+  const correo = document.getElementById('recovery-email').value.trim();
+  const errorEl = document.getElementById('recovery-error-1');
+  const errorMsg = document.getElementById('recovery-error-msg-1');
+  const btn = document.getElementById('btn-recovery-step1');
+  
+  errorEl.classList.add('hidden');
+  if (!correo) return;
+  
+  btn.disabled = true;
+  btn.querySelector('.btn-text').classList.add('hidden');
+  btn.querySelector('.btn-loader').classList.remove('hidden');
+  
+  try {
+    await ApiAuth.recuperarPassword(correo);
+    recoveryEmailPending = correo;
+    document.getElementById('recovery-step1-form').classList.add('hidden');
+    document.getElementById('recovery-step2-form').classList.remove('hidden');
+    showToast('Código enviado a tu Telegram.');
+  } catch (err) {
+    errorMsg.textContent = err.message;
+    errorEl.classList.remove('hidden');
+  } finally {
+    btn.disabled = false;
+    btn.querySelector('.btn-text').classList.remove('hidden');
+    btn.querySelector('.btn-loader').classList.add('hidden');
+  }
+}
+
+export async function submitRecoveryStep2(e) {
+  e.preventDefault();
+  const codigo = document.getElementById('recovery-code').value.trim();
+  const nuevaPass = document.getElementById('recovery-new-password').value;
+  const errorEl = document.getElementById('recovery-error-2');
+  const errorMsg = document.getElementById('recovery-error-msg-2');
+  const btn = document.getElementById('btn-recovery-step2');
+  
+  errorEl.classList.add('hidden');
+  if (!codigo || !nuevaPass) return;
+  if (nuevaPass.length < 6) {
+    errorMsg.textContent = 'La nueva contraseña debe tener al menos 6 caracteres.';
+    errorEl.classList.remove('hidden');
+    return;
+  }
+  
+  btn.disabled = true;
+  btn.querySelector('.btn-text').classList.add('hidden');
+  btn.querySelector('.btn-loader').classList.remove('hidden');
+  
+  try {
+    const res = await ApiAuth.resetPassword(recoveryEmailPending, codigo, nuevaPass);
+    showToast(res.mensaje || 'Contraseña cambiada exitosamente.');
+    closeRecoveryModal();
+    // Pre-llenar el correo en el login
+    document.getElementById('login-correo').value = recoveryEmailPending;
+    document.getElementById('login-password').focus();
+  } catch (err) {
+    errorMsg.textContent = err.message;
+    errorEl.classList.remove('hidden');
+  } finally {
+    btn.disabled = false;
+    btn.querySelector('.btn-text').classList.remove('hidden');
+    btn.querySelector('.btn-loader').classList.add('hidden');
+  }
 }
