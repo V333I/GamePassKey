@@ -77,12 +77,20 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
 
 # ---------------------------------------------------------------------------
-# CORS — preparado para frontend local
+# CORS — preparado para frontend local y producción
 # ---------------------------------------------------------------------------
+
+# Obtenemos los orígenes permitidos desde las variables de entorno, separados por comas.
+# Si no existe, usamos ["*"] (modo de desarrollo inseguro).
+allowed_origins_env = os.getenv("ALLOWED_ORIGINS")
+if allowed_origins_env:
+    allowed_origins = [origin.strip() for origin in allowed_origins_env.split(",")]
+else:
+    allowed_origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
