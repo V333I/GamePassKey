@@ -42,6 +42,11 @@ app = FastAPI(
     redoc_url="/redoc",
 )
 
+@app.on_event("startup")
+def startup_event():
+    from app.telegram_service import start_telegram_polling
+    start_telegram_polling()
+
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)

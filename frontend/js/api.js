@@ -253,7 +253,11 @@ export const ApiUsuarios = {
   /**
    * Updates the authenticated user's profile.
    * @param {Object} datos - The updated profile data.
-   * @returns {Promise<Object>} The updated profile response.
+   * @returns {Promise<Object>} The updated profile data.
    */
-  actualizarPerfil: (datos) => apiFetch('/usuarios/perfil', { method: 'PUT', body: JSON.stringify(datos) }),
+  actualizarPerfil: (datos) =>
+    apiFetch('/usuarios/perfil', { method: 'PUT', body: JSON.stringify(datos) }),
+    
+  telegramLink: () => apiFetch('/usuarios/perfil/telegram-link', { method: 'POST' }),
+  telegramStatus: () => apiFetch('/usuarios/perfil/telegram-status'),
 };

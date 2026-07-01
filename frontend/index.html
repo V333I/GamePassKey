@@ -559,15 +559,21 @@
           </div>
 
           <div class="form-group" style="margin-top:20px">
-            <label style="color:var(--text-secondary);font-size:0.8rem;margin-bottom:6px;display:block">Telegram Chat ID (2FA) — vacío para desactivar</label>
-            <div class="input-wrapper">
-              <span class="input-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg></span>
-              <input type="text" id="edit-profile-telegram" inputmode="numeric" placeholder="Ej. 123456789 (con @userinfobot)" />
-              <div class="input-line"></div>
+            <label style="color:var(--text-secondary);font-size:0.8rem;margin-bottom:6px;display:block">Seguridad 2FA (Telegram)</label>
+            <div id="telegram-link-container" style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.03);padding:12px;border-radius:12px;border:1px solid rgba(255,255,255,0.05);">
+               <div id="telegram-status-icon" style="color:var(--text-secondary)"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg></div>
+               <div style="flex:1">
+                 <div id="telegram-status-text" style="font-size:0.9rem;font-weight:600;color:var(--text-primary)">No vinculado</div>
+                 <div style="font-size:0.75rem;color:var(--text-secondary)">Añade 2FA para proteger tu cuenta</div>
+               </div>
+               <button type="button" id="btn-telegram-link" onclick="initiateTelegramLink()" class="btn-primary" style="padding:8px 16px;font-size:0.8rem;border-radius:8px;background:#2AABEE;color:white;display:flex;align-items:center;gap:6px;">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg> Vincular
+               </button>
+               <button type="button" id="btn-telegram-unlink" onclick="unlinkTelegram()" class="btn-secondary hidden" style="padding:8px 16px;font-size:0.8rem;border-radius:8px;display:flex;align-items:center;gap:6px;">
+                  Desvincular
+               </button>
             </div>
-            <p style="font-size:0.72rem;color:var(--text-secondary);margin-top:6px;line-height:1.4">
-              Abre tu bot en Telegram y escribe a <strong>@userinfobot</strong> para obtener tu Chat ID. Si lo configuras, en cada inicio de sesión recibirás un código por Telegram.
-            </p>
+            <input type="hidden" id="edit-profile-telegram" value="" />
           </div>
 
           <div id="edit-profile-error" class="alert alert-error hidden" style="margin-top:16px">

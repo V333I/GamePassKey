@@ -45,8 +45,8 @@ export function openEditProfileModal() {
   document.getElementById('edit-profile-name').value = document.getElementById('profile-name').textContent;
   document.getElementById('edit-profile-pass-current').value = '';
   document.getElementById('edit-profile-pass-new').value = '';
-  const telInput = document.getElementById('edit-profile-telegram');
-  if (telInput) telInput.value = telegramChatIdActual;
+  
+  updateTelegramLinkUI();
 }
 
 /**
@@ -56,6 +56,74 @@ export function openEditProfileModal() {
  */
 export function closeEditProfileModal() {
   document.getElementById('modal-edit-profile').classList.add('hidden');
+}
+
+let pollingInterval = null;
+
+export function updateTelegramLinkUI() {
+  const icon = document.getElementById('telegram-status-icon');
+  const text = document.getElementById('telegram-status-text');
+  const btnLink = document.getElementById('btn-telegram-link');
+  const btnUnlink = document.getElementById('btn-telegram-unlink');
+  const input = document.getElementById('edit-profile-telegram');
+
+  if (telegramChatIdActual) {
+    icon.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#00C853" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+    text.textContent = 'Vinculado y Activo';
+    text.style.color = '#00C853';
+    if(btnLink) btnLink.classList.add('hidden');
+    if(btnUnlink) btnUnlink.classList.remove('hidden');
+    if (input) input.value = telegramChatIdActual;
+  } else {
+    icon.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>';
+    text.textContent = 'No vinculado';
+    text.style.color = 'var(--text-primary)';
+    if(btnLink) btnLink.classList.remove('hidden');
+    if(btnUnlink) btnUnlink.classList.add('hidden');
+    if (input) input.value = '';
+  }
+}
+
+export async function initiateTelegramLink() {
+  const btn = document.getElementById('btn-telegram-link');
+  if(!btn) return;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner" style="width:14px;height:14px;border-width:2px;border-color:rgba(255,255,255,0.3);border-top-color:white;"></span> Esperando...';
+  
+  try {
+    const res = await ApiUsuarios.telegramLink();
+    window.open(res.link, '_blank');
+    
+    if (pollingInterval) clearInterval(pollingInterval);
+    pollingInterval = setInterval(async () => {
+      try {
+        const statusRes = await ApiUsuarios.telegramStatus();
+        if (statusRes.vinculado) {
+          clearInterval(pollingInterval);
+          telegramChatIdActual = statusRes.chat_id;
+          updateTelegramLinkUI();
+          
+          // Actualizar UI principal del perfil de fondo
+          const telEl = document.getElementById('p-telegram');
+          if (telEl) {
+            telEl.innerHTML = makeBadge('Activa') + ` <span style="color:var(--text-secondary);font-size:0.8rem">(${telegramChatIdActual})</span>`;
+          }
+          showToast('¡Telegram vinculado exitosamente!');
+        }
+      } catch (err) {}
+    }, 3000);
+  } catch (err) {
+    btn.disabled = false;
+    btn.innerHTML = 'Reintentar';
+    showToast('Error al generar enlace de Telegram', 'error');
+  }
+}
+
+export function unlinkTelegram() {
+  telegramChatIdActual = '';
+  const input = document.getElementById('edit-profile-telegram');
+  if (input) input.value = '';
+  updateTelegramLinkUI();
 }
 
 /**

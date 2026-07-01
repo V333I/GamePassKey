@@ -60,6 +60,8 @@ class Usuario(Base):
     correo        = Column(String(150), unique=True, nullable=False, index=True)
     password_hash = Column(String(255), nullable=False)
     telegram_chat_id = Column(String(50), nullable=True)  # Chat de Telegram para 2FA (OTP). NULL = sin OTP.
+    telegram_link_token = Column(String(100), nullable=True, unique=True, index=True) # Token temporal para Deep Linking
+    telegram_link_expires = Column(DateTime, nullable=True) # Expiración del token
     estado        = Column(
         Enum("activo", "bloqueado", "inactivo", name="estado_usuario"),
         default="activo", nullable=False

@@ -7,6 +7,8 @@ PUT  /usuarios/{id}     → actualizar datos
 PUT  /usuarios/{id}/estado → cambiar estado
 """
 
+import secrets
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
@@ -78,6 +80,33 @@ def actualizar_mi_perfil(
     registrar_log(db, "ACTUALIZAR_PERFIL", "El usuario actualizó su perfil.", id_usuario=usuario.id_usuario)
     return usuario
 
+
+@router.post("/perfil/telegram-link", summary="Generar enlace de vinculación de Telegram")
+def generar_enlace_telegram(
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_current_user),
+):
+    """Genera un token mágico para deep linking con el bot de Telegram."""
+    token = f"gpk-{secrets.token_hex(6)}"
+    usuario.telegram_link_token = token
+    usuario.telegram_link_expires = datetime.now(timezone.utc) + timedelta(minutes=10)
+    db.commit()
+    
+    # Asegúrate de usar el username real de tu bot
+    bot_username = "GamePassKeyBot" 
+    link = f"https://t.me/{bot_username}?start={token}"
+    return {"link": link, "token": token}
+
+@router.get("/perfil/telegram-status", summary="Verificar estado de vinculación")
+def verificar_estado_telegram(
+    db: Session = Depends(get_db),
+    usuario: Usuario = Depends(get_current_user),
+):
+    """El frontend hace polling aquí para saber si el bot ya vinculó la cuenta."""
+    return {
+        "vinculado": usuario.telegram_chat_id is not None,
+        "chat_id": usuario.telegram_chat_id
+    }
 
 @router.get("/{id_usuario}", response_model=UsuarioResponse, summary="Detalle de usuario")
 def obtener_usuario(
