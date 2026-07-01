@@ -93,7 +93,7 @@ def generar_enlace_telegram(
     db.commit()
     
     # Asegúrate de usar el username real de tu bot
-    bot_username = "GamePassKeyBot" 
+    bot_username = "GamePassKey_bot" 
     link = f"https://t.me/{bot_username}?start={token}"
     return {"link": link, "token": token}
 
