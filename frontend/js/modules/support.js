@@ -1,6 +1,11 @@
 import { apiFetch } from '../api.js';
 import { showToast, closeModal } from './ui.js';
 
+/**
+ * Función: enviarSoporte.
+ * (Documentación autogenerada)
+ * @function enviarSoporte
+ */
 export async function enviarSoporte(event) {
   event.preventDefault();
   const asunto = document.getElementById('soporte-asunto').value;

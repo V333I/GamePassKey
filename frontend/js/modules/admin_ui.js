@@ -96,6 +96,11 @@ export function closeModal(id) {
   }
 }
 
+/**
+ * Función: closeModalOverlay.
+ * (Documentación autogenerada)
+ * @function closeModalOverlay
+ */
 export function closeModalOverlay(e, id) {
   if (e.target === document.getElementById(id)) closeModal(id);
 }
@@ -172,6 +177,11 @@ export function showConfirmModal(title, message) {
   });
 }
 
+/**
+ * Función: makeBadge.
+ * (Documentación autogenerada)
+ * @function makeBadge
+ */
 export function makeBadge(estado) {
   const map = {
     activo:        'badge-active',

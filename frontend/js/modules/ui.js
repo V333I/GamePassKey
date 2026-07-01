@@ -72,12 +72,27 @@ export function showToast(msg, type = 'success') {
   }, 3500);
 }
 
+/**
+ * Función: showView.
+ * (Documentación autogenerada)
+ * @function showView
+ */
 export function showView(viewId) {
   document.querySelectorAll('.view').forEach(v => v.classList.add('hidden'));
   const v = document.getElementById(viewId);
   if (v) { v.classList.remove('hidden'); v.classList.add('active'); }
 }
+/**
+ * Función: showLogin.
+ * (Documentación autogenerada)
+ * @function showLogin
+ */
 export function showLogin() { showView('view-login'); }
+/**
+ * Función: showDashboard.
+ * (Documentación autogenerada)
+ * @function showDashboard
+ */
 export function showDashboard() { showView('view-dashboard'); }
 
 /**
@@ -111,6 +126,11 @@ export function switchSection(name, el) {
   if (loaders[name]) loaders[name]();
 }
 
+/**
+ * Función: initSearchFilter.
+ * (Documentación autogenerada)
+ * @function initSearchFilter
+ */
 export function initSearchFilter() {
   const searchInput = document.getElementById('search-input');
   if(searchInput) {
@@ -125,6 +145,11 @@ export function initSearchFilter() {
   }
 }
 
+/**
+ * Función: generateCover.
+ * (Documentación autogenerada)
+ * @function generateCover
+ */
 export function generateCover(title, index, coverUrl) {
   if (coverUrl) {
     return `
@@ -142,6 +167,11 @@ export function generateCover(title, index, coverUrl) {
     </div>`;
 }
 
+/**
+ * Función: makeBadge.
+ * (Documentación autogenerada)
+ * @function makeBadge
+ */
 export function makeBadge(estado) {
   const map = {
     activo:       { cls: 'badge-active',      label: 'READY' },
@@ -203,6 +233,11 @@ export function buildGameCard(juego, idx, context = 'library') {
   return card;
 }
 
+/**
+ * Función: openGameModal.
+ * (Documentación autogenerada)
+ * @function openGameModal
+ */
 export async function openGameModal(juego, idx, context = 'library') {
   document.getElementById('modal-cover').innerHTML = generateCover(juego.titulo, idx, juego.imagen_portada);
   document.getElementById('modal-genres').innerHTML = juego.genero
@@ -267,11 +302,21 @@ export async function openGameModal(juego, idx, context = 'library') {
   document.getElementById('modal-game').classList.remove('hidden');
 }
 
+/**
+ * Función: openModal.
+ * (Documentación autogenerada)
+ * @function openModal
+ */
 export function openModal(id) {
   const el = document.getElementById(id);
   if (el) el.classList.remove('hidden');
 }
 
+/**
+ * Función: closeModal.
+ * (Documentación autogenerada)
+ * @function closeModal
+ */
 export function closeModal(id) {
   if (typeof id === 'string') {
     const el = document.getElementById(id);

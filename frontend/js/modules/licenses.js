@@ -1,6 +1,11 @@
 import { ApiLicencias, ApiJuegos } from '../api.js';
 import { makeBadge, escapeHTML } from './ui.js';
 
+/**
+ * Función: loadLicenses.
+ * (Documentación autogenerada)
+ * @function loadLicenses
+ */
 export async function loadLicenses() {
   const list = document.getElementById('licenses-list');
   list.innerHTML = `<div class="loading-state"><div class="spinner-large"></div><p>Cargando licencias...</p></div>`;

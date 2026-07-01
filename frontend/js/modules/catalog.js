@@ -1,6 +1,11 @@
 import { ApiJuegos, apiFetch } from '../api.js';
 import { buildGameCard, showToast } from './ui.js';
 
+/**
+ * Función: loadCatalog.
+ * (Documentación autogenerada)
+ * @function loadCatalog
+ */
 export async function loadCatalog() {
   const grid    = document.getElementById('catalog-grid');
   const loading = document.getElementById('catalog-loading');
@@ -21,6 +26,11 @@ export async function loadCatalog() {
   }
 }
 
+/**
+ * Función: solicitarJuego.
+ * (Documentación autogenerada)
+ * @function solicitarJuego
+ */
 export async function solicitarJuego(idJuego, btn) {
   const originalText = btn.innerHTML;
   btn.innerHTML = '<div class="btn-loader"></div>';

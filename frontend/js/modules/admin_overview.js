@@ -1,6 +1,11 @@
 import { api } from './admin_api.js';
 import { setAllUsers, setAllGames } from './admin_state.js';
 
+/**
+ * Función: loadOverview.
+ * (Documentación autogenerada)
+ * @function loadOverview
+ */
 export async function loadOverview() {
   try {
     const res = await api('/usuarios?limit=500');

@@ -2,6 +2,11 @@ import { api } from './admin_api.js';
 import { showToast, showConfirmModal } from './admin_ui.js';
 import { escapeHTML } from './ui.js';
 
+/**
+ * Función: loadSolicitudes.
+ * (Documentación autogenerada)
+ * @function loadSolicitudes
+ */
 export async function loadSolicitudes() {
   const wrap = document.getElementById('solicitudes-table-wrap');
   if (!wrap) return;
@@ -49,6 +54,11 @@ export async function loadSolicitudes() {
   }
 }
 
+/**
+ * Función: aprobarSolicitud.
+ * (Documentación autogenerada)
+ * @function aprobarSolicitud
+ */
 export async function aprobarSolicitud(id) {
   const confirmed = await showConfirmModal('Aprobar Solicitud', '¿Seguro que quieres aprobar esta solicitud? Se generará un código y se enviará al usuario.');
   if (!confirmed) return;
@@ -61,6 +71,11 @@ export async function aprobarSolicitud(id) {
   }
 }
 
+/**
+ * Función: rechazarSolicitud.
+ * (Documentación autogenerada)
+ * @function rechazarSolicitud
+ */
 export async function rechazarSolicitud(id) {
   const confirmed = await showConfirmModal('Rechazar Solicitud', '¿Seguro que quieres rechazar esta solicitud?');
   if (!confirmed) return;
@@ -73,6 +88,11 @@ export async function rechazarSolicitud(id) {
   }
 }
 
+/**
+ * Función: checkPendingRequests.
+ * (Documentación autogenerada)
+ * @function checkPendingRequests
+ */
 export async function checkPendingRequests() {
   try {
     const solicitudes = await api('/solicitudes');

@@ -2,6 +2,11 @@ import { api } from './admin_api.js';
 import { showToast, openModal, closeModal, makeBadge } from './admin_ui.js';
 import { escapeHTML } from './ui.js';
 
+/**
+ * Función: checkOpenTickets.
+ * (Documentación autogenerada)
+ * @function checkOpenTickets
+ */
 export async function checkOpenTickets() {
   try {
     const tickets = await api('/soporte');
@@ -20,6 +25,11 @@ export async function checkOpenTickets() {
   }
 }
 
+/**
+ * Función: loadSoporte.
+ * (Documentación autogenerada)
+ * @function loadSoporte
+ */
 export async function loadSoporte() {
   const wrap = document.getElementById('soporte-table-wrap');
   wrap.innerHTML = `<div class="loading-state"><div class="spinner-large"></div><p>Cargando tickets...</p></div>`;
@@ -56,12 +66,22 @@ export async function loadSoporte() {
   }
 }
 
+/**
+ * Función: resolverTicket.
+ * (Documentación autogenerada)
+ * @function resolverTicket
+ */
 export function resolverTicket(id) {
   document.getElementById('rt-id').value = id;
   document.getElementById('form-resolver-ticket').reset();
   openModal('modal-resolver-ticket');
 }
 
+/**
+ * Función: submitResolverTicket.
+ * (Documentación autogenerada)
+ * @function submitResolverTicket
+ */
 export async function submitResolverTicket(estado) {
   const id = document.getElementById('rt-id').value;
   const respuesta = document.getElementById('rt-respuesta').value.trim();

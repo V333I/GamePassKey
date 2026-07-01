@@ -4,6 +4,11 @@ import { openRedeemModal } from './library.js';
 
 export let notificacionesActivas = [];
 
+/**
+ * Función: loadNotifications.
+ * (Documentación autogenerada)
+ * @function loadNotifications
+ */
 export async function loadNotifications() {
   try {
     const res = await apiFetch('/notificaciones');
@@ -14,6 +19,11 @@ export async function loadNotifications() {
   }
 }
 
+/**
+ * Función: updateNotificationBell.
+ * (Documentación autogenerada)
+ * @function updateNotificationBell
+ */
 export function updateNotificationBell() {
   const dot = document.getElementById('notification-dot');
   if(!dot) return;
@@ -25,6 +35,11 @@ export function updateNotificationBell() {
   }
 }
 
+/**
+ * Función: toggleNotifications.
+ * (Documentación autogenerada)
+ * @function toggleNotifications
+ */
 export function toggleNotifications() {
   const modal = document.getElementById('modal-notifications');
   if (modal.classList.contains('hidden')) {
@@ -35,10 +50,20 @@ export function toggleNotifications() {
   }
 }
 
+/**
+ * Función: closeNotifications.
+ * (Documentación autogenerada)
+ * @function closeNotifications
+ */
 export function closeNotifications() {
   document.getElementById('modal-notifications').classList.add('hidden');
 }
 
+/**
+ * Función: renderNotifications.
+ * (Documentación autogenerada)
+ * @function renderNotifications
+ */
 export function renderNotifications() {
   const list = document.getElementById('notifications-list');
   if (!notificacionesActivas.length) {
@@ -78,6 +103,11 @@ export function renderNotifications() {
   }).join('');
 }
 
+/**
+ * Función: markAsRead.
+ * (Documentación autogenerada)
+ * @function markAsRead
+ */
 export async function markAsRead(id, el) {
   try {
     await apiFetch(`/notificaciones/${id}/leer`, { method: 'PUT' });

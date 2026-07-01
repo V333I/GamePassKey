@@ -5,6 +5,11 @@ import { logout } from './auth.js';
 // Chat ID de Telegram actual del usuario (para detectar cambios al editar).
 let telegramChatIdActual = '';
 
+/**
+ * Función: loadProfile.
+ * (Documentación autogenerada)
+ * @function loadProfile
+ */
 export async function loadProfile() {
   const user = Auth.user();
   if (!user) return;
@@ -29,6 +34,11 @@ export async function loadProfile() {
   } catch {}
 }
 
+/**
+ * Función: openEditProfileModal.
+ * (Documentación autogenerada)
+ * @function openEditProfileModal
+ */
 export function openEditProfileModal() {
   document.getElementById('modal-edit-profile').classList.remove('hidden');
   document.getElementById('edit-profile-error').classList.add('hidden');
@@ -39,10 +49,20 @@ export function openEditProfileModal() {
   if (telInput) telInput.value = telegramChatIdActual;
 }
 
+/**
+ * Función: closeEditProfileModal.
+ * (Documentación autogenerada)
+ * @function closeEditProfileModal
+ */
 export function closeEditProfileModal() {
   document.getElementById('modal-edit-profile').classList.add('hidden');
 }
 
+/**
+ * Función: submitEditProfile.
+ * (Documentación autogenerada)
+ * @function submitEditProfile
+ */
 export async function submitEditProfile(event) {
   event.preventDefault();
   const name = document.getElementById('edit-profile-name').value.trim();

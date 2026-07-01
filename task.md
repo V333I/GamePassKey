@@ -11,4 +11,4 @@
 - [x] Documentar `modules/admin_logs.js`
 - [x] Documentar `modules/admin_ui.js`
 - [x] Documentar `modules/admin_licenses.js`
-- [ ] Documentar el resto de los módulos en `frontend/js/modules/`
+- [x] Documentar el resto de los módulos en `frontend/js/modules/`

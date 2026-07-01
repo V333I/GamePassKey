@@ -1,6 +1,11 @@
 import { ApiDispositivos } from '../api.js';
 import { makeBadge, showToast, escapeHTML } from './ui.js';
 
+/**
+ * Función: loadDevices.
+ * (Documentación autogenerada)
+ * @function loadDevices
+ */
 export async function loadDevices() {
   const list = document.getElementById('devices-list');
   list.innerHTML = `<div class="loading-state"><div class="spinner-large"></div><p>Cargando dispositivos...</p></div>`;
@@ -52,6 +57,11 @@ export async function loadDevices() {
   }
 }
 
+/**
+ * Función: showRegisterDevice.
+ * (Documentación autogenerada)
+ * @function showRegisterDevice
+ */
 export function showRegisterDevice() {
   document.getElementById('modal-register-device').classList.remove('hidden');
   document.getElementById('reg-dev-error').classList.add('hidden');
@@ -66,10 +76,20 @@ export function showRegisterDevice() {
   }
 }
 
+/**
+ * Función: closeRegisterDevice.
+ * (Documentación autogenerada)
+ * @function closeRegisterDevice
+ */
 export function closeRegisterDevice() {
   document.getElementById('modal-register-device').classList.add('hidden');
 }
 
+/**
+ * Función: submitRegisterDevice.
+ * (Documentación autogenerada)
+ * @function submitRegisterDevice
+ */
 export async function submitRegisterDevice(event) {
   event.preventDefault();
   const name = document.getElementById('reg-dev-name').value.trim();
@@ -107,6 +127,11 @@ export async function submitRegisterDevice(event) {
   }
 }
 
+/**
+ * Función: desvincularDispositivo.
+ * (Documentación autogenerada)
+ * @function desvincularDispositivo
+ */
 export async function desvincularDispositivo(id, event) {
   const btn = event ? event.target.closest('button') : null;
   const oldText = btn ? btn.innerHTML : 'Desvincular';

@@ -1,6 +1,11 @@
 import { showToast } from './admin_ui.js';
 import { Auth, API_BASE } from './api.js';
 
+/**
+ * Función: api.
+ * (Documentación autogenerada)
+ * @function api
+ */
 export async function api(path, options = {}) {
   const headers = { 'Content-Type': 'application/json' };
   if (Auth.token()) headers['Authorization'] = `Bearer ${Auth.token()}`;

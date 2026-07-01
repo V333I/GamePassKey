@@ -1,6 +1,11 @@
 import { api } from './admin_api.js';
 import { openModal, showConfirmModal, showToast } from './admin_ui.js';
 
+/**
+ * Función: abrirDispositivosUsuario.
+ * (Documentación autogenerada)
+ * @function abrirDispositivosUsuario
+ */
 export async function abrirDispositivosUsuario(id_usuario, nombre_usuario) {
   document.getElementById('modal-dispositivos-title').textContent = `Dispositivos de ${nombre_usuario}`;
   const content = document.getElementById('admin-dispositivos-content');
@@ -39,6 +44,11 @@ export async function abrirDispositivosUsuario(id_usuario, nombre_usuario) {
   }
 }
 
+/**
+ * Función: desvincularDispositivo.
+ * (Documentación autogenerada)
+ * @function desvincularDispositivo
+ */
 export async function desvincularDispositivo(id_dispositivo, id_usuario, nombre_usuario) {
   const confirmed = await showConfirmModal(
     'Desvincular Dispositivo', 

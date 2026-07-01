@@ -2,11 +2,21 @@ import { Auth } from './api.js';
 import { api } from './admin_api.js';
 import { showToast, closeModal } from './admin_ui.js';
 
+/**
+ * Función: autoGenerarCodigo.
+ * (Documentación autogenerada)
+ * @function autoGenerarCodigo
+ */
 export function autoGenerarCodigo() {
   document.getElementById('c-codigo').value = '';
   document.getElementById('codigo-preview-text').textContent = 'GENERADO DE FORMA SEGURA POR EL SERVIDOR';
 }
 
+/**
+ * Función: copiarCodigo.
+ * (Documentación autogenerada)
+ * @function copiarCodigo
+ */
 export function copiarCodigo() {
   const code = document.getElementById('codigo-preview-text').textContent;
   navigator.clipboard.writeText(code).then(() => {
@@ -16,6 +26,11 @@ export function copiarCodigo() {
   });
 }
 
+/**
+ * Función: loadCodigos.
+ * (Documentación autogenerada)
+ * @function loadCodigos
+ */
 export async function loadCodigos() {
   const wrap  = document.getElementById('codigos-table-wrap');
   const estado = document.getElementById('codigos-estado-filter')?.value || '';
@@ -84,6 +99,11 @@ export async function loadCodigos() {
   }
 }
 
+/**
+ * Función: submitCodigo.
+ * (Documentación autogenerada)
+ * @function submitCodigo
+ */
 export async function submitCodigo(e) {
   e.preventDefault();
   const errEl  = document.getElementById('form-codigo-error');

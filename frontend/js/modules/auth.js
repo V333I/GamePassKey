@@ -2,6 +2,11 @@ import { apiFetch, Auth, ApiAuth, ApiUsuarios } from '../api.js';
 import { showToast, showDashboard, showLogin, switchSection } from './ui.js';
 import { loadLibrary } from './library.js';
 
+/**
+ * Función: togglePassword.
+ * (Documentación autogenerada)
+ * @function togglePassword
+ */
 export function togglePassword() {
   const input = document.getElementById('login-password');
   input.type = input.type === 'password' ? 'text' : 'password';
@@ -52,6 +57,11 @@ export function cancelarOtp() {
   document.getElementById('login-form').classList.remove('hidden');
 }
 
+/**
+ * Función: initAuth.
+ * (Documentación autogenerada)
+ * @function initAuth
+ */
 export function initAuth() {
   document.getElementById('login-form')?.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -169,6 +179,11 @@ export function initAuth() {
   });
 }
 
+/**
+ * Función: logout.
+ * (Documentación autogenerada)
+ * @function logout
+ */
 export async function logout() {
   try { await ApiAuth.logout(); } catch(e) {}
   Auth.clear();
