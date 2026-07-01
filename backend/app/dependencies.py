@@ -93,7 +93,7 @@ def require_admin(
     Raises:
         HTTPException 403: Si el usuario no tiene rol de administrador.
     """
-    if current_user.rol.nombre_rol != "administrador":
+    if current_user.rol.nombre_rol.lower() != "administrador":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Acceso denegado. Se requiere rol de administrador.",
