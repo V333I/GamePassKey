@@ -269,8 +269,12 @@
 
       <!-- ══ SECCIÓN: LOGS ════════════════════════════════════ -->
       <section id="section-logs" class="content-section hidden">
-        <div class="section-header">
+        <div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
           <div><h1 class="section-title">Logs de Seguridad</h1><p class="section-sub">Auditoría de eventos en el sistema</p></div>
+          <button class="btn-admin-primary" onclick="exportarLogsExcel()" title="Exportar a Excel (CSV)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px; height:16px; margin-right:6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Exportar CSV
+          </button>
         </div>
         <div class="admin-card">
           <div id="logs-table-wrap">

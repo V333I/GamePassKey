@@ -55,7 +55,60 @@ export async function loadLogs(page = 0) {
       ` : ''}
     `;
   } catch (err) {
-    wrap.innerHTML = `<div class="empty-state"><h3>Error</h3><p>${err.message}</p></div>`;
+    console.error(err);
+    wrap.innerHTML = `<div class="empty-state" style="color:var(--accent-red)"><h3>Error</h3><p>${err.message}</p></div>`;
+  }
+}
+
+/**
+ * Exporta todos los logs disponibles a un archivo CSV compatible con Excel.
+ */
+export async function exportarLogsExcel() {
+  try {
+    const btn = document.querySelector('button[onclick="exportarLogsExcel()"]');
+    if(btn) btn.disabled = true;
+    
+    // Obtenemos los logs, podemos pedir hasta 10000 para asegurar que bajen todos o la mayoría
+    const url = `/logs?skip=0&limite=10000`;
+    const res = await api(url);
+    const logs = res.items || res;
+    
+    if (!logs || !logs.length) {
+      alert("No hay logs disponibles para exportar.");
+      if(btn) btn.disabled = false;
+      return;
+    }
+    
+    // BOM para UTF-8 en Excel
+    let csvContent = "\uFEFFFecha,Acción,Usuario ID,Descripción,IP,Nivel\n";
+    
+    logs.forEach(l => {
+      const fecha = new Date(l.fecha_evento).toLocaleString('es').replace(/,/g, '');
+      const accion = `"${l.accion}"`;
+      const userId = l.id_usuario || '';
+      const descripcion = `"${(l.descripcion || '').replace(/"/g, '""')}"`;
+      const ip = `"${l.ip_origen || ''}"`;
+      const nivel = `"${l.nivel}"`;
+      
+      csvContent += `${fecha},${accion},${userId},${descripcion},${ip},${nivel}\n`;
+    });
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const blobUrl = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", blobUrl);
+    link.setAttribute("download", `GamePassKey_Logs_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(blobUrl);
+    
+    if(btn) btn.disabled = false;
+  } catch (err) {
+    console.error("Error al exportar logs:", err);
+    alert("Hubo un error al exportar los logs: " + err.message);
+    const btn = document.querySelector('button[onclick="exportarLogsExcel()"]');
+    if(btn) btn.disabled = false;
   }
 }
 

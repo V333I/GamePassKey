@@ -92,9 +92,16 @@ export async function apiFetch(path, options = {}) {
   // Manejo de token expirado o no válido (401 Unauthorized)
   if (res.status === 401) {
     Auth.clear();
-    // Assuming showLogin is available globally or imported if needed
     if (window.showLogin) window.showLogin();
-    throw new Error('Sesión expirada. Por favor inicia sesión nuevamente.');
+    
+    let msg = 'Sesión expirada. Por favor inicia sesión nuevamente.';
+    try {
+      const errBody = await res.clone().json();
+      if (errBody && errBody.detail) {
+        msg = errBody.detail;
+      }
+    } catch (e) {}
+    throw new Error(msg);
   }
 
   // Intenta parsear la respuesta a JSON si fue exitosa, o devuelve null

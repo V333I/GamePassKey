@@ -64,6 +64,7 @@ window.resolverTicket = adminSupport.resolverTicket;
 window.submitResolverTicket = adminSupport.submitResolverTicket;
 
 window.loadLogs = adminLogs.loadLogs;
+window.exportarLogsExcel = adminLogs.exportarLogsExcel;
 
 // Initialization
 document.addEventListener('DOMContentLoaded', () => {
