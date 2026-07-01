@@ -57,6 +57,17 @@ def startup_event():
         if not db.query(Rol).filter(Rol.id_rol == 2).first():
             db.add(Rol(id_rol=2, nombre_rol="Usuario", descripcion="Acceso estándar"))
             
+        # Ampliar el límite de caracteres para la imagen de portada en Postgres/MySQL
+        from sqlalchemy import text
+        try:
+            db.execute(text("ALTER TABLE juegos ALTER COLUMN imagen_portada TYPE VARCHAR(2048);"))
+        except Exception:
+            # En caso de estar en MySQL (local) o que la sintaxis varíe
+            try:
+                db.execute(text("ALTER TABLE juegos MODIFY imagen_portada VARCHAR(2048);"))
+            except Exception:
+                pass
+                
         db.commit()
     finally:
         db.close()

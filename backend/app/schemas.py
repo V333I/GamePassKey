@@ -150,7 +150,7 @@ class JuegoBase(BaseModel):
     desarrollador: Optional[str] = Field(None, max_length=150)
     version_actual: Optional[str] = Field(None, max_length=50)
     ruta_instalador: Optional[str] = Field(None, max_length=255)
-    imagen_portada: Optional[str] = Field(None, max_length=255)
+    imagen_portada: Optional[str] = Field(None, max_length=2048)
     estado: Optional[str] = Field("activo", description="activo | inactivo | mantenimiento")
     fecha_lanzamiento: Optional[date] = None
 
@@ -168,7 +168,7 @@ class JuegoUpdate(BaseModel):
     desarrollador: Optional[str] = Field(None, max_length=150)
     version_actual: Optional[str] = Field(None, max_length=50)
     ruta_instalador: Optional[str] = Field(None, max_length=255)
-    imagen_portada: Optional[str] = Field(None, max_length=255)
+    imagen_portada: Optional[str] = Field(None, max_length=2048)
     estado: Optional[str] = None
     fecha_lanzamiento: Optional[date] = None
 

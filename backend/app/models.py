@@ -100,7 +100,7 @@ class Juego(Base):
     desarrollador    = Column(String(150), nullable=True)
     version_actual   = Column(String(50), nullable=True)
     ruta_instalador  = Column(String(255), nullable=True)
-    imagen_portada   = Column(String(255), nullable=True)
+    imagen_portada   = Column(String(2048), nullable=True)
     estado           = Column(
         Enum("activo", "inactivo", "mantenimiento", name="estado_juego"),
         default="activo", nullable=True
