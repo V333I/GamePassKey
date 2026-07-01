@@ -2,7 +2,7 @@
 GamePassKey API — Punto de entrada principal
 Registra todos los módulos de la aplicación.
 """
-
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
