@@ -16,16 +16,27 @@ load_dotenv()
 # ---------------------------------------------------------------------------
 # Construcción de la URL de conexión
 # ---------------------------------------------------------------------------
+# En producción (Render + Supabase/PostgreSQL) se define DATABASE_URL con la
+# cadena de conexión completa. En desarrollo local, si no existe DATABASE_URL,
+# se reconstruye la URL de MySQL a partir de las variables DB_* individuales.
 
-DB_HOST = os.getenv("DB_HOST", "localhost")
-DB_PORT = os.getenv("DB_PORT", "3306")
-DB_USER = os.getenv("DB_USER", "root")
-DB_PASSWORD = os.getenv("DB_PASSWORD", "")
-DB_NAME = os.getenv("DB_NAME", "gamepasskey")
+DATABASE_URL = os.getenv("DATABASE_URL")
 
-DATABASE_URL = (
-    f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-)
+if not DATABASE_URL:
+    DB_HOST = os.getenv("DB_HOST", "localhost")
+    DB_PORT = os.getenv("DB_PORT", "3306")
+    DB_USER = os.getenv("DB_USER", "root")
+    DB_PASSWORD = os.getenv("DB_PASSWORD", "")
+    DB_NAME = os.getenv("DB_NAME", "gamepasskey")
+
+    DATABASE_URL = (
+        f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
+    )
+
+# Normaliza el prefijo antiguo "postgres://" (que SQLAlchemy 2.0 ya no acepta)
+# al esquema moderno "postgresql://".
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 # ---------------------------------------------------------------------------
 # Motor y sesión de SQLAlchemy
