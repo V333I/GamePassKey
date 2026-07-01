@@ -33,7 +33,7 @@ def _ip(request: Request) -> str | None:
     return request.client.host if request.client else None
 
 
-def _crear_sesion_y_token(db: Session, usuario: Usuario, request: Request) -> TokenResponse:
+def _crear_sesion_y_token(db: Session, usuario: Usuario, request: Request, response: Response) -> TokenResponse:
     """
     Crea una sesión stateful (jti) en BD y devuelve el TokenResponse con el JWT.
     Se usa tras validar credenciales (login sin OTP), tras verificar el OTP y
@@ -61,6 +61,8 @@ def _crear_sesion_y_token(db: Session, usuario: Usuario, request: Request) -> To
         expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES),
     )
 
+
+    response.set_cookie(key="gpk_token", value=token, httponly=True, secure=True, samesite="none")
     return TokenResponse(
         access_token=token,
         token_type="bearer",
@@ -138,7 +140,7 @@ router = APIRouter(prefix="/auth", tags=["Autenticación"])
 
 @router.post("/register", response_model=TokenResponse, summary="Registrar usuario")
 @limiter.limit("5/minute")
-def register(datos: RegisterRequest, request: Request, db: Session = Depends(get_db)):
+def register(datos: RegisterRequest, request: Request, response: Response, db: Session = Depends(get_db)):
     """
     Registra un nuevo usuario con rol de USUARIO (2) e inicia sesión automáticamente.
     """
@@ -180,12 +182,12 @@ def register(datos: RegisterRequest, request: Request, db: Session = Depends(get
     
     # Iniciar sesión automáticamente (el usuario recién creado aún no tiene
     # Telegram vinculado, por lo que no aplica OTP en el registro).
-    return _crear_sesion_y_token(db, nuevo_usuario, request)
+    return _crear_sesion_y_token(db, nuevo_usuario, request, response)
 
 
 @router.post("/login", response_model=None, summary="Iniciar sesión")
 @limiter.limit("5/minute")
-def login(datos: LoginRequest, request: Request, db: Session = Depends(get_db), rate_limit: bool = Depends(check_rate_limit("LOGIN_FALLIDO"))) -> TokenResponse | OTPRequiredResponse:
+def login(datos: LoginRequest, request: Request, response: Response, db: Session = Depends(get_db), rate_limit: bool = Depends(check_rate_limit("LOGIN_FALLIDO"))) -> TokenResponse | OTPRequiredResponse:
     """
     Autentica al usuario y devuelve un token JWT stateful.
     
@@ -255,12 +257,12 @@ def login(datos: LoginRequest, request: Request, db: Session = Depends(get_db), 
         id_usuario=usuario.id_usuario,
         ip_origen=_ip(request),
     )
-    return _crear_sesion_y_token(db, usuario, request)
+    return _crear_sesion_y_token(db, usuario, request, response)
 
 
 @router.post("/verify-otp", response_model=TokenResponse, summary="Verificar código OTP")
 @limiter.limit("10/minute")
-def verify_otp(datos: VerifyOTPRequest, request: Request, db: Session = Depends(get_db)):
+def verify_otp(datos: VerifyOTPRequest, request: Request, response: Response, db: Session = Depends(get_db)):
     """
     Segundo paso del login con 2FA: valida el código OTP enviado por Telegram
     y, si es correcto, crea la sesión y devuelve el token JWT.
@@ -344,21 +346,29 @@ def verify_otp(datos: VerifyOTPRequest, request: Request, db: Session = Depends(
         id_usuario=usuario.id_usuario,
         ip_origen=_ip(request),
     )
-    return _crear_sesion_y_token(db, usuario, request)
+    return _crear_sesion_y_token(db, usuario, request, response)
 
 
 @router.post("/logout", summary="Cerrar sesión")
-def logout(credentials = Depends(security), db: Session = Depends(get_db)):
+def logout(request: Request, response: Response, credentials = Depends(security), db: Session = Depends(get_db)):
     """
     Invalida el token JWT actual cerrando la sesión en BD.
     
-    Extrae el `jti` (JWT ID) del token proporcionado en la cabecera, busca la
+    Extrae el `jti` (JWT ID) del token proporcionado en la cookie o cabecera, busca la
     sesión correspondiente en la base de datos y cambia su estado a 'cerrada'.
     Esto impide que el mismo token pueda usarse nuevamente (logout real stateful).
     """
-    token = credentials.credentials
+    token = request.cookies.get("gpk_token")
+    if not token and credentials:
+        token = credentials.credentials
+        
+    if not token:
+        response.delete_cookie(key="gpk_token", secure=True, samesite="none")
+        return {"mensaje": "Sesión cerrada localmente."}
+        
     payload = decodificar_token(token)
     if not payload:
+        response.delete_cookie(key="gpk_token", secure=True, samesite="none")
         return {"mensaje": "Sesión cerrada localmente."}
         
     jti = payload.get("jti")

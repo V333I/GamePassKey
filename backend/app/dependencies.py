@@ -15,7 +15,8 @@ from app.auth import decodificar_token
 from app.database import get_db
 from app.models import LogSeguridad, Usuario, Sesion
 
-security = HTTPBearer()
+# auto_error=False para permitir extraer el token de la cookie si el header no está
+security = HTTPBearer(auto_error=False)
 
 
 # ---------------------------------------------------------------------------
@@ -24,13 +25,24 @@ security = HTTPBearer()
 
 
 def get_current_user(
+    request: Request,
     credentials: HTTPAuthorizationCredentials = Depends(security),
     db: Session = Depends(get_db),
 ) -> Usuario:
     """
-    Valida el Bearer token JWT del header Authorization y chequea estado en BD.
+    Valida el token JWT desde la cookie 'gpk_token' o del header Authorization.
     """
-    token = credentials.credentials
+    token = request.cookies.get("gpk_token")
+    if not token and credentials:
+        token = credentials.credentials
+        
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="No autenticado.",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+        
     payload = decodificar_token(token)
 
     if payload is None:

@@ -30,7 +30,7 @@ export const Auth = {
    * @param {number} data.id_rol - The user's role ID (1 for Admin, 2 for User).
    */
   save(data) {
-    localStorage.setItem('gpk_token', data.access_token);
+    // El token ahora se guarda automáticamente en una cookie HttpOnly enviada por el backend.
     // Guarda el objeto del usuario serializado en localStorage
     localStorage.setItem('gpk_user', JSON.stringify({
       id_usuario:     data.id_usuario,
@@ -45,7 +45,7 @@ export const Auth = {
    * Retrieves the access token from local storage.
    * @returns {string|null} The stored token or null if not found.
    */
-  token()   { return localStorage.getItem('gpk_token'); },
+  token()   { return null; // Ya no usamos token en localStorage },
   
   /**
    * Retrieves the user details from local storage.
@@ -60,7 +60,9 @@ export const Auth = {
    * Clears the authentication data from local storage, effectively logging the user out.
    */
   clear()   { 
-    localStorage.removeItem('gpk_token'); 
+    // Llamar al backend para invalidar la cookie de forma asíncrona (fuego y olvido)
+    fetch(`${API_BASE}/logout`, { method: 'POST', credentials: 'include' }).catch(() => {});
+    localStorage.removeItem('gpk_token'); // Por si acaso quedaba alguno viejo
     localStorage.removeItem('gpk_user'); 
   },
   
@@ -68,7 +70,7 @@ export const Auth = {
    * Checks if the user is currently logged in.
    * @returns {boolean} True if a token exists, false otherwise.
    */
-  isLoggedIn() { return !!this.token(); },
+  isLoggedIn() { return !!this.user(); },
 };
 
 // ── Base fetch wrapper ────────────────────────────────────────────
@@ -87,6 +89,9 @@ export async function apiFetch(path, options = {}) {
   // Si hay token disponible, lo añade a la cabecera de Autorización
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
+  // Asegurar que las cookies se envíen con la petición
+  options.credentials = 'include';
+  
   const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
 
   // Manejo de token expirado o no válido (401 Unauthorized)
