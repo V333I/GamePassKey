@@ -83,27 +83,20 @@ def register(
             detail="Este correo ya está registrado. Intenta iniciar sesión.",
         )
 
-    # 2. Buscar rol 'cliente' o 'administrador' dependiendo de si es el primer usuario
-    total_usuarios = db.query(Usuario).count()
-    if total_usuarios == 0:
-        # Primer usuario en la plataforma = Administrador (1)
-        rol_asignado = 1
-    else:
-        # Demas usuarios = Cliente (2)
-        rol_cliente = (
-            db.query(Rol).filter(Rol.nombre_rol == "cliente").first()
-            or db.query(Rol).filter(Rol.id_rol == 2).first()
+    # 2. Buscar rol 'cliente' (si no existe, usar id_rol = 2)
+    rol_cliente = (
+        db.query(Rol).filter(Rol.nombre_rol == "cliente").first()
+        or db.query(Rol).filter(Rol.id_rol == 2).first()
+    )
+    if not rol_cliente:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Rol 'cliente' no encontrado. Contacta al administrador.",
         )
-        if not rol_cliente:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Rol 'cliente' no encontrado. Contacta al administrador.",
-            )
-        rol_asignado = rol_cliente.id_rol
 
     # 3. Crear usuario
     nuevo_usuario = Usuario(
-        id_rol=rol_asignado,
+        id_rol=rol_cliente.id_rol,
         nombre_usuario=datos.nombre_usuario.strip(),
         correo=datos.correo.lower().strip(),
         password_hash=generar_hash_password(datos.password),
