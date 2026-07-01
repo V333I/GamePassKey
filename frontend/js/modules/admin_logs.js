@@ -99,29 +99,35 @@ export async function exportarLogsExcel() {
       return;
     }
     
-    // BOM para UTF-8 en Excel
-    let csvContent = "\uFEFFFecha,Acción,Usuario ID,Descripción,IP,Nivel\n";
+    // Mapear logs a un formato limpio para Excel
+    const dataForExcel = logs.map(l => ({
+      "Fecha": new Date(l.fecha_evento).toLocaleString('es'),
+      "Acción": l.accion,
+      "Usuario ID": l.id_usuario || '',
+      "Descripción": l.descripcion || '',
+      "IP": l.ip_origen || '',
+      "Nivel": l.nivel
+    }));
     
-    logs.forEach(l => {
-      const fecha = new Date(l.fecha_evento).toLocaleString('es').replace(/,/g, '');
-      const accion = `"${l.accion}"`;
-      const userId = l.id_usuario || '';
-      const descripcion = `"${(l.descripcion || '').replace(/"/g, '""')}"`;
-      const ip = `"${l.ip_origen || ''}"`;
-      const nivel = `"${l.nivel}"`;
-      
-      csvContent += `${fecha},${accion},${userId},${descripcion},${ip},${nivel}\n`;
-    });
+    // Crear hoja de cálculo y libro usando SheetJS
+    const worksheet = XLSX.utils.json_to_sheet(dataForExcel);
     
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const blobUrl = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.setAttribute("href", blobUrl);
-    link.setAttribute("download", `GamePassKey_Logs_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(blobUrl);
+    // Ajustar el ancho de las columnas para que se vea profesional
+    const wscols = [
+      { wch: 20 }, // Fecha
+      { wch: 25 }, // Acción
+      { wch: 10 }, // Usuario ID
+      { wch: 60 }, // Descripción
+      { wch: 15 }, // IP
+      { wch: 15 }  // Nivel
+    ];
+    worksheet['!cols'] = wscols;
+    
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Logs de Seguridad");
+    
+    // Descargar el archivo .xlsx
+    XLSX.writeFile(workbook, `GamePassKey_Logs_${new Date().toISOString().split('T')[0]}.xlsx`);
     
     if(btn) btn.disabled = false;
   } catch (err) {
