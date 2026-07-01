@@ -1108,9 +1108,20 @@ input  { font-family: inherit; outline: none; border: none; }
   .sidebar { width: 60px; }
   .sidebar-item span { display: none; }
   .sidebar-item { justify-content: center; }
+  .sidebar-footer { display: none; }
   .profile-grid { grid-template-columns: 1fr; }
   .games-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
-  .nav-tagline, .nav-user { display: none; }
+  .nav-tagline { display: none; }
+  .nav-brand { display: none; }
+  .topnav-left { margin-right: 5px; }
+  .topnav-center { display: none; }
+  .btn-logout { padding: 6px 10px; font-size: 0.75rem; }
+  .btn-logout svg { width: 16px; height: 16px; margin-right: 4px; }
+  .nav-role { display: none; }
+  .nav-user { margin-right: 5px; font-size: 0.85rem; max-width: 80px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+  .topnav-right { gap: 8px; }
+  .section-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .header-actions { width: 100%; display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; }
 }
 
 
