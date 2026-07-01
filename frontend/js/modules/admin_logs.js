@@ -68,7 +68,21 @@ export async function exportarLogsExcel() {
     const btn = document.querySelector('button[onclick="exportarLogsExcel()"]');
     if(btn) btn.disabled = true;
     
-    // Obtenemos los logs, pidiendo en bloques de 500 para respetar el límite de validación del backend
+    // Obtenemos todos los usuarios para mapear el ID a su nombre real
+    let usuariosMap = {};
+    try {
+      const resUsr = await api('/usuarios?limite=10000');
+      const usuarios = resUsr.items || resUsr;
+      if (usuarios && usuarios.length) {
+        usuarios.forEach(u => {
+          usuariosMap[u.id_usuario] = `${u.nombre_usuario} (${u.correo})`;
+        });
+      }
+    } catch (err) {
+      console.warn("No se pudieron cargar los usuarios para el mapeo:", err);
+    }
+    
+    // Obtenemos los logs en bucle para respetar el límite máximo de 500 del backend
     let todosLosLogs = [];
     let skip = 0;
     const limite = 500;
@@ -156,14 +170,19 @@ export async function exportarLogsExcel() {
     const logsData = [
       ["REGISTRO DETALLADO DE EVENTOS DEL SISTEMA", "", "", "", "", ""],
       ["", "", "", "", "", ""],
-      ["FECHA", "ACCIÓN", "USUARIO ID", "DESCRIPCIÓN", "DIRECCIÓN IP", "NIVEL DE RIESGO"]
+      ["FECHA", "ACCIÓN", "USUARIO", "DESCRIPCIÓN", "DIRECCIÓN IP", "NIVEL DE RIESGO"]
     ];
     
     logs.forEach(l => {
+      let usuarioStr = l.id_usuario ? `#${l.id_usuario}` : 'N/A';
+      if (l.id_usuario && usuariosMap[l.id_usuario]) {
+        usuarioStr = `#${l.id_usuario} - ${usuariosMap[l.id_usuario]}`;
+      }
+      
       logsData.push([
         new Date(l.fecha_evento).toLocaleString('es'),
         l.accion,
-        l.id_usuario ? `#${l.id_usuario}` : 'N/A',
+        usuarioStr,
         l.descripcion || '',
         l.ip_origen || '',
         l.nivel.toUpperCase()
@@ -208,7 +227,49 @@ export async function exportarLogsExcel() {
       }
     }
     
-    wsLogs['!cols'] = [{ wch: 22 }, { wch: 25 }, { wch: 12 }, { wch: 60 }, { wch: 18 }, { wch: 18 }];
+    wsLogs['!cols'] = [{ wch: 22 }, { wch: 25 }, { wch: 35 }, { wch: 60 }, { wch: 18 }, { wch: 18 }];
+    
+    // =========================================================================
+    // HOJA 3: LEYENDA Y GLOSARIO
+    // =========================================================================
+    const glosarioData = [
+      ["GLOSARIO Y LEYENDA TÉCNICA", ""],
+      ["", ""],
+      ["NIVEL DE RIESGO", "SIGNIFICADO Y ACCIÓN RECOMENDADA"],
+      ["INFO", "Eventos normales del sistema (ej. login exitoso). No requieren acción."],
+      ["ADVERTENCIA", "Comportamiento inusual (ej. contraseña incorrecta). Monitorear si se repite."],
+      ["CRÍTICO", "Riesgo alto de seguridad (ej. cuenta bloqueada, ataque detectado). Requiere revisión inmediata."],
+      ["", ""],
+      ["ACCIÓN REGISTRADA", "DESCRIPCIÓN DEL EVENTO"],
+      ["LOGIN_EXITOSO", "El usuario inició sesión correctamente proporcionando credenciales y código OTP válido."],
+      ["LOGIN_OTP_PENDIENTE", "El usuario proporcionó contraseña correcta pero aún debe verificar el código OTP enviado a Telegram."],
+      ["OTP_ENVIADO", "El sistema envió satisfactoriamente un código de seguridad al Telegram del usuario."],
+      ["LOGIN_FALLIDO", "Intento de inicio de sesión con contraseña incorrecta o correo inexistente."],
+      ["REGISTRO_USUARIO", "Un nuevo usuario fue creado o se registró en el portal."],
+      ["CANJEAR_CODIGO", "El usuario canjeó un código de un solo uso para adquirir la licencia de un juego."],
+      ["SOLICITUD_CREADA", "El usuario solicitó acceso manual a un juego desde la biblioteca."],
+      ["SOLICITUD_APROBADA", "El administrador aprobó la solicitud de un juego."],
+      ["SOLICITUD_RECHAZADA", "El administrador denegó la solicitud de un juego."],
+      ["RESOLVER_TICKET", "El administrador marcó un ticket de soporte como resuelto."]
+    ];
+    
+    const wsGlosario = XLSX.utils.aoa_to_sheet(glosarioData);
+    
+    // Estilos Hoja 3
+    wsGlosario['A1'].s = titleStyle;
+    wsGlosario['B1'].s = titleStyle;
+    if(!wsGlosario['!merges']) wsGlosario['!merges'] = [];
+    wsGlosario['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: 1 } });
+    
+    wsGlosario['A3'].s = headerStyle; wsGlosario['B3'].s = headerStyle;
+    wsGlosario['A8'].s = headerStyle; wsGlosario['B8'].s = headerStyle;
+    
+    // Colores de riesgo en el glosario
+    wsGlosario['A4'].s = { fill: { fgColor: { rgb: "E8F5E9" } }, font: { bold: true, color: { rgb: "2E7D32" } }, alignment: { horizontal: "center" } };
+    wsGlosario['A5'].s = { fill: { fgColor: { rgb: "FFF3E0" } }, font: { bold: true, color: { rgb: "E65100" } }, alignment: { horizontal: "center" } };
+    wsGlosario['A6'].s = { fill: { fgColor: { rgb: "FFEBEE" } }, font: { bold: true, color: { rgb: "C62828" } }, alignment: { horizontal: "center" } };
+    
+    wsGlosario['!cols'] = [{ wch: 25 }, { wch: 90 }];
     
     // =========================================================================
     // GENERAR LIBRO Y DESCARGAR
@@ -216,6 +277,7 @@ export async function exportarLogsExcel() {
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, wsDashboard, "Dashboard y Resumen");
     XLSX.utils.book_append_sheet(workbook, wsLogs, "Logs Detallados");
+    XLSX.utils.book_append_sheet(workbook, wsGlosario, "Leyenda y Glosario");
     
     XLSX.writeFile(workbook, `GamePassKey_Seguridad_${new Date().toISOString().split('T')[0]}.xlsx`);
     
