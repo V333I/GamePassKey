@@ -33,14 +33,24 @@ def get_current_user(
     Valida el token JWT desde la cookie 'gpk_token' o del header Authorization.
     """
     token = request.cookies.get("gpk_token")
+    is_cookie = True
+    
     if not token and credentials:
         token = credentials.credentials
+        is_cookie = False
         
     if not token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="No autenticado.",
             headers={"WWW-Authenticate": "Bearer"},
+        )
+        
+    # Prevención CSRF: Si usamos cookies (samesite=none), exigir cabecera custom
+    if is_cookie and request.headers.get("X-Requested-With") != "XMLHttpRequest":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Petición bloqueada por prevención CSRF (Falta cabecera X-Requested-With).",
         )
         
     payload = decodificar_token(token)

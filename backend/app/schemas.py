@@ -29,7 +29,7 @@ class PaginatedResponse(BaseModel, Generic[T]):
 class LoginRequest(BaseModel):
     """Schema para la petición de inicio de sesión."""
     correo: str = Field(..., description="Correo del usuario", examples=["admin@gamepasskey.local"])
-    password: str = Field(..., min_length=6, description="Contraseña")
+    password: str = Field(..., min_length=6, max_length=128, description="Contraseña")
 
     model_config = {"json_schema_extra": {"example": {"correo": "admin@gamepasskey.local", "password": "Admin123"}}}
 
@@ -81,7 +81,7 @@ class UsuarioBase(BaseModel):
 
 class UsuarioCreate(UsuarioBase):
     """Schema para la creación de un nuevo usuario."""
-    password: str = Field(..., min_length=8, description="Contraseña en texto plano")
+    password: str = Field(..., min_length=8, max_length=128, description="Contraseña en texto plano")
 
     @field_validator('password')
     @classmethod
@@ -108,8 +108,8 @@ class UsuarioEstado(BaseModel):
 class UsuarioUpdatePerfil(BaseModel):
     """Schema para la actualización del perfil por el propio usuario."""
     nombre_usuario: Optional[str] = Field(None, max_length=100)
-    password_actual: Optional[str] = None
-    password_nuevo: Optional[str] = Field(None, min_length=8)
+    password_actual: Optional[str] = Field(None, max_length=128)
+    password_nuevo: Optional[str] = Field(None, min_length=8, max_length=128)
     telegram_chat_id: Optional[str] = Field(None, max_length=50, description="Chat ID de Telegram para 2FA. Cadena vacía para desvincular.")
 
     @field_validator('password_nuevo')

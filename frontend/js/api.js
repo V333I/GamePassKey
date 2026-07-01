@@ -84,7 +84,11 @@ export const Auth = {
  */
 export async function apiFetch(path, options = {}) {
   const token = Auth.token();
-  const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+  const headers = { 
+    'Content-Type': 'application/json', 
+    'X-Requested-With': 'XMLHttpRequest', // Anti-CSRF
+    ...(options.headers || {}) 
+  };
   
   // Si hay token disponible, lo añade a la cabecera de Autorización
   if (token) headers['Authorization'] = `Bearer ${token}`;
