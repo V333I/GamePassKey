@@ -11,7 +11,7 @@
  */
 export const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
   ? 'http://localhost:8000'
-  : 'https://gamepasskey-backend.onrender.com'; // URL que te dará Render para tu backend
+  : 'https://gamepasskey-7.onrender.com'; // URL que te dará Render para tu backend
 
 // ── Token management ─────────────────────────────────────────────
 /**
