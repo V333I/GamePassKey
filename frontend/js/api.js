@@ -45,7 +45,7 @@ export const Auth = {
    * Retrieves the access token from local storage.
    * @returns {string|null} The stored token or null if not found.
    */
-  token()   { return null; // Ya no usamos token en localStorage },
+  token()   { return null; /* Ya no usamos token en localStorage */ },
   
   /**
    * Retrieves the user details from local storage.
