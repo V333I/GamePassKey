@@ -69,7 +69,7 @@ window.exportarLogsExcel = adminLogs.exportarLogsExcel;
 // Initialization
 document.addEventListener('DOMContentLoaded', () => {
   // Verifica si el usuario está autenticado, sino lo redirige
-  if (!Auth.token()) {
+  if (!Auth.isLoggedIn()) {
     window.location.href = 'index.html';
     return;
   }

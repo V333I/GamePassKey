@@ -7,8 +7,15 @@ import { Auth, API_BASE } from './api.js';
  * @function api
  */
 export async function api(path, options = {}) {
-  const headers = { 'Content-Type': 'application/json' };
+  const headers = { 
+    'Content-Type': 'application/json',
+    'X-Requested-With': 'XMLHttpRequest',
+    ...(options.headers || {})
+  };
+  
   if (Auth.token()) headers['Authorization'] = `Bearer ${Auth.token()}`;
+  
+  options.credentials = 'include';
   const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
   if (res.status === 401 || res.status === 403) {
     showToast('Sin permisos de administrador. Redirigiendo...', 'error');

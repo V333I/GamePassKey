@@ -22,7 +22,7 @@ export const Auth = {
    * @param {Object} data - Auth data containing token and user info.
    */
   save(data) {
-    localStorage.setItem('gpk_token', data.access_token);
+    // El token ahora se guarda automáticamente en una cookie HttpOnly enviada por el backend.
     // Guarda el objeto del usuario serializado en localStorage
     localStorage.setItem('gpk_user', JSON.stringify({
       id_usuario:     data.id_usuario,
@@ -34,16 +34,20 @@ export const Auth = {
   },
   
   /** @returns {string|null} The stored token. */
-  token()   { return localStorage.getItem('gpk_token'); },
+  token()   { return null; /* Ya no usamos token en localStorage */ },
   
   /** @returns {Object|null} The parsed user object. */
   user()    { const u = localStorage.getItem('gpk_user'); return u ? JSON.parse(u) : null; },
   
   /** Clears the authentication data. */
-  clear()   { localStorage.removeItem('gpk_token'); localStorage.removeItem('gpk_user'); },
+  clear()   { 
+    fetch(`${API_BASE}/logout`, { method: 'POST', credentials: 'include', headers: { 'X-Requested-With': 'XMLHttpRequest' } }).catch(() => {});
+    localStorage.removeItem('gpk_token'); 
+    localStorage.removeItem('gpk_user'); 
+  },
   
   /** @returns {boolean} True if a token exists. */
-  isLoggedIn() { return !!this.token(); },
+  isLoggedIn() { return !!this.user(); },
 };
 
 /**
@@ -56,9 +60,15 @@ export const Auth = {
  */
 export async function apiFetch(path, options = {}) {
   const token = Auth.token();
-  const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+  const headers = { 
+    'Content-Type': 'application/json', 
+    'X-Requested-With': 'XMLHttpRequest',
+    ...(options.headers || {}) 
+  };
+  
   if (token) headers['Authorization'] = `Bearer ${token}`;
 
+  options.credentials = 'include';
   const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
 
   // Manejo de token expirado o no válido
