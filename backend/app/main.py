@@ -46,6 +46,19 @@ app = FastAPI(
 def startup_event():
     from app.telegram_service import start_telegram_polling
     start_telegram_polling()
+    
+    # Asegurar que existan los roles básicos en la base de datos
+    from app.database import SessionLocal
+    from app.models import Rol
+    db = SessionLocal()
+    try:
+        if not db.query(Rol).filter(Rol.id_rol == 1).first():
+            db.add(Rol(id_rol=1, nombre_rol="Administrador", descripcion="Acceso total"))
+        if not db.query(Rol).filter(Rol.id_rol == 2).first():
+            db.add(Rol(id_rol=2, nombre_rol="Usuario", descripcion="Acceso estándar"))
+        db.commit()
+    finally:
+        db.close()
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
@@ -57,18 +70,7 @@ app.add_middleware(SlowAPIMiddleware)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost",
-        "http://localhost:80",
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "http://localhost:8080",
-        "http://127.0.0.1",
-        "http://127.0.0.1:80",
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:8080",
-    ],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
