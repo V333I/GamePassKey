@@ -66,6 +66,7 @@ export function editJuego(id) {
   document.getElementById('j-estado').value         = j.estado || 'activo';
   document.getElementById('j-descripcion').value    = j.descripcion || '';
   document.getElementById('j-ruta').value           = j.ruta_instalador || '';
+  document.getElementById('j-caratula').value       = j.imagen_portada || '';
   document.getElementById('modal-juego-title').textContent = 'Editar Juego: ' + j.titulo;
   document.getElementById('form-juego-error').classList.add('hidden');
   document.getElementById('modal-juego').classList.remove('hidden');
@@ -99,28 +100,10 @@ export async function submitJuego(e) {
     estado:          document.getElementById('j-estado').value,
     descripcion:     document.getElementById('j-descripcion').value.trim() || null,
     ruta_instalador: document.getElementById('j-ruta').value.trim() || null,
+    imagen_portada:  document.getElementById('j-caratula').value.trim() || null,
   };
 
   try {
-    const fileInput = document.getElementById('j-caratula');
-    if (fileInput.files.length > 0) {
-      const file = fileInput.files[0];
-      const formData = new FormData();
-      formData.append('file', file);
-      
-      const res = await fetch(`${API_BASE}/juegos/upload-cover`, {
-        method: 'POST',
-        headers: { 'Authorization': `Bearer ${Auth.token()}` },
-        body: formData
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(()=>({}));
-        throw new Error(err.detail || 'Error al subir la carátula');
-      }
-      const data = await res.json();
-      payload.imagen_portada = data.imagen_portada;
-    }
-
     if (id) {
       await api(`/juegos/${id}`, { method: 'PUT', body: JSON.stringify(payload) });
       showToast(`Juego actualizado correctamente.`);
