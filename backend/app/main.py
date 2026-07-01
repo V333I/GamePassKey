@@ -56,6 +56,13 @@ def startup_event():
             db.add(Rol(id_rol=1, nombre_rol="Administrador", descripcion="Acceso total"))
         if not db.query(Rol).filter(Rol.id_rol == 2).first():
             db.add(Rol(id_rol=2, nombre_rol="Usuario", descripcion="Acceso estándar"))
+        
+        # Truco automático: Hacer que el primer usuario registrado sea administrador
+        from app.models import Usuario
+        primer_usuario = db.query(Usuario).order_by(Usuario.id_usuario.asc()).first()
+        if primer_usuario and primer_usuario.id_rol != 1:
+            primer_usuario.id_rol = 1
+            
         db.commit()
     finally:
         db.close()
