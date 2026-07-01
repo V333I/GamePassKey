@@ -6,9 +6,12 @@
 
 /**
  * Base URL for the API
+ * Detecta si está en localhost o en producción (Render)
  * @type {string}
  */
-export const API_BASE = 'http://localhost:8000';
+export const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? 'http://localhost:8000'
+  : 'https://gamepasskey-backend.onrender.com'; // URL que te dará Render para tu backend
 
 // ── Token management ─────────────────────────────────────────────
 /**

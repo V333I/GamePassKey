@@ -1,0 +1,23 @@
+services:
+  # 1. Backend (FastAPI Web Service)
+  - type: web
+    name: gamepasskey-backend
+    env: python
+    buildCommand: "cd backend && pip install -r requirements.txt"
+    startCommand: "cd backend && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0
+      - key: DATABASE_URL
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: SECRET_KEY
+        sync: false
+
+  # 2. Frontend (Static Site)
+  - type: web
+    name: gamepasskey-frontend
+    env: static
+    buildCommand: "" # No build step for vanilla HTML/JS
+    staticPublishPath: "./frontend"

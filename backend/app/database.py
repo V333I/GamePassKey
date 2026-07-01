@@ -23,9 +23,16 @@ DB_USER = os.getenv("DB_USER", "root")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "")
 DB_NAME = os.getenv("DB_NAME", "gamepasskey")
 
-DATABASE_URL = (
+# Si Render o un proveedor provee DATABASE_URL, se usará esa directamente.
+# De lo contrario, arma la URL para MySQL local.
+DATABASE_URL = os.getenv(
+    "DATABASE_URL", 
     f"mysql+pymysql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
 )
+
+# Render provee postgres:// pero SQLAlchemy 1.4+ requiere postgresql://
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 # ---------------------------------------------------------------------------
 # Motor y sesión de SQLAlchemy
