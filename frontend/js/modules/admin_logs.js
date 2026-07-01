@@ -68,10 +68,30 @@ export async function exportarLogsExcel() {
     const btn = document.querySelector('button[onclick="exportarLogsExcel()"]');
     if(btn) btn.disabled = true;
     
-    // Obtenemos los logs, podemos pedir hasta 10000 para asegurar que bajen todos o la mayoría
-    const url = `/logs?skip=0&limite=10000`;
-    const res = await api(url);
-    const logs = res.items || res;
+    // Obtenemos los logs, pidiendo en bloques de 500 para respetar el límite de validación del backend
+    let todosLosLogs = [];
+    let skip = 0;
+    const limite = 500;
+    let hayMas = true;
+    
+    while (hayMas) {
+      const url = `/logs?skip=${skip}&limite=${limite}`;
+      const res = await api(url);
+      const chunk = res.items || res;
+      
+      if (!chunk || chunk.length === 0) {
+        hayMas = false;
+      } else {
+        todosLosLogs = todosLosLogs.concat(chunk);
+        if (chunk.length < limite) {
+          hayMas = false;
+        } else {
+          skip += limite;
+        }
+      }
+    }
+    
+    const logs = todosLosLogs;
     
     if (!logs || !logs.length) {
       alert("No hay logs disponibles para exportar.");
