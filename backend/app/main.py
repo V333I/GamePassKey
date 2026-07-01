@@ -3,6 +3,8 @@ GamePassKey API — Punto de entrada principal
 Registra todos los módulos de la aplicación.
 """
 
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from slowapi import _rate_limit_exceeded_handler
@@ -52,23 +54,33 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 app.add_middleware(SlowAPIMiddleware)
 
 # ---------------------------------------------------------------------------
-# CORS — preparado para frontend local
+# CORS — orígenes locales + orígenes de producción vía variable de entorno
 # ---------------------------------------------------------------------------
+# En producción, define CORS_ORIGINS con los dominios del frontend separados
+# por comas. Ej: CORS_ORIGINS="https://mi-app.vercel.app,https://otro.com"
+
+_origenes_locales = [
+    "http://localhost",
+    "http://localhost:80",
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://localhost:8080",
+    "http://127.0.0.1",
+    "http://127.0.0.1:80",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:8080",
+]
+
+_origenes_produccion = [
+    origen.strip()
+    for origen in os.getenv("CORS_ORIGINS", "").split(",")
+    if origen.strip()
+]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost",
-        "http://localhost:80",
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "http://localhost:8080",
-        "http://127.0.0.1",
-        "http://127.0.0.1:80",
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:5173",
-        "http://127.0.0.1:8080",
-    ],
+    allow_origins=_origenes_locales + _origenes_produccion,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

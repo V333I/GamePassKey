@@ -8,7 +8,10 @@
  * Base URL for the API
  * @type {string}
  */
-export const API_BASE = 'http://localhost:8000';
+export const API_BASE =
+  (location.hostname === 'localhost' || location.hostname === '127.0.0.1')
+    ? 'http://localhost:8000'
+    : 'https://gamepasskey.onrender.com';
 
 /**
  * Auth object for managing user session in local storage.
