@@ -99,35 +99,125 @@ export async function exportarLogsExcel() {
       return;
     }
     
-    // Mapear logs a un formato limpio para Excel
-    const dataForExcel = logs.map(l => ({
-      "Fecha": new Date(l.fecha_evento).toLocaleString('es'),
-      "Acción": l.accion,
-      "Usuario ID": l.id_usuario || '',
-      "Descripción": l.descripcion || '',
-      "IP": l.ip_origen || '',
-      "Nivel": l.nivel
-    }));
+    // =========================================================================
+    // HOJA 1: RESUMEN EJECUTIVO (Dashboard)
+    // =========================================================================
+    const totalLogs = logs.length;
+    const loginsExitosos = logs.filter(l => l.accion === 'LOGIN_EXITOSO').length;
+    const loginsFallidos = logs.filter(l => l.accion === 'LOGIN_FALLIDO').length;
+    const otpEnviados = logs.filter(l => l.accion === 'OTP_ENVIADO').length;
+    const codigosCanjeados = logs.filter(l => l.accion === 'CANJEAR_CODIGO').length;
     
-    // Crear hoja de cálculo y libro usando SheetJS
-    const worksheet = XLSX.utils.json_to_sheet(dataForExcel);
-    
-    // Ajustar el ancho de las columnas para que se vea profesional
-    const wscols = [
-      { wch: 20 }, // Fecha
-      { wch: 25 }, // Acción
-      { wch: 10 }, // Usuario ID
-      { wch: 60 }, // Descripción
-      { wch: 15 }, // IP
-      { wch: 15 }  // Nivel
+    const dashboardData = [
+      ["GAMEPASSKEY - REPORTE DE SEGURIDAD Y AUDITORÍA", ""],
+      ["Fecha de generación:", new Date().toLocaleString('es')],
+      ["", ""],
+      ["MÉTRICAS PRINCIPALES", "CANTIDAD"],
+      ["Total de Eventos Registrados", totalLogs],
+      ["Inicios de Sesión Exitosos", loginsExitosos],
+      ["Inicios de Sesión Fallidos", loginsFallidos],
+      ["Códigos OTP 2FA Enviados", otpEnviados],
+      ["Juegos Canjeados (Licencias)", codigosCanjeados]
     ];
-    worksheet['!cols'] = wscols;
     
+    const wsDashboard = XLSX.utils.aoa_to_sheet(dashboardData);
+    
+    // Estilos Hoja 1
+    const titleStyle = { font: { bold: true, color: { rgb: "FFFFFF" }, sz: 14 }, fill: { fgColor: { rgb: "091221" } }, alignment: { horizontal: "center" } };
+    const headerStyle = { font: { bold: true, color: { rgb: "FFFFFF" } }, fill: { fgColor: { rgb: "00d4ff" } } };
+    const labelStyle = { font: { bold: true, color: { rgb: "333333" } } };
+    const valStyle = { font: { bold: true, color: { rgb: "0052cc" } }, alignment: { horizontal: "center" } };
+    
+    wsDashboard['A1'].s = titleStyle;
+    wsDashboard['B1'].s = titleStyle;
+    wsDashboard['A2'].s = labelStyle;
+    wsDashboard['A4'].s = headerStyle;
+    wsDashboard['B4'].s = headerStyle;
+    
+    // Estilizar las filas de métricas
+    for(let r=4; r<=8; r++) {
+      const cellA = XLSX.utils.encode_cell({c:0, r:r});
+      const cellB = XLSX.utils.encode_cell({c:1, r:r});
+      if(wsDashboard[cellA]) wsDashboard[cellA].s = { font: { bold: true }, border: { bottom: { style: "thin", color: { rgb: "DDDDDD" } } } };
+      if(wsDashboard[cellB]) wsDashboard[cellB].s = { ...valStyle, border: { bottom: { style: "thin", color: { rgb: "DDDDDD" } } } };
+    }
+    
+    // Combinar celdas A1:B1
+    if(!wsDashboard['!merges']) wsDashboard['!merges'] = [];
+    wsDashboard['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: 1 } });
+    
+    wsDashboard['!cols'] = [{ wch: 35 }, { wch: 15 }];
+    
+    // =========================================================================
+    // HOJA 2: LOGS DETALLADOS
+    // =========================================================================
+    
+    // Construir tabla de logs con metadatos arriba
+    const logsData = [
+      ["REGISTRO DETALLADO DE EVENTOS DEL SISTEMA", "", "", "", "", ""],
+      ["", "", "", "", "", ""],
+      ["FECHA", "ACCIÓN", "USUARIO ID", "DESCRIPCIÓN", "DIRECCIÓN IP", "NIVEL DE RIESGO"]
+    ];
+    
+    logs.forEach(l => {
+      logsData.push([
+        new Date(l.fecha_evento).toLocaleString('es'),
+        l.accion,
+        l.id_usuario ? `#${l.id_usuario}` : 'N/A',
+        l.descripcion || '',
+        l.ip_origen || '',
+        l.nivel.toUpperCase()
+      ]);
+    });
+    
+    const wsLogs = XLSX.utils.aoa_to_sheet(logsData);
+    
+    // Estilos Hoja 2
+    wsLogs['A1'].s = { font: { bold: true, color: { rgb: "FFFFFF" }, sz: 12 }, fill: { fgColor: { rgb: "333333" } }, alignment: { horizontal: "center" } };
+    wsLogs['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 5 } }];
+    
+    const thStyle = { font: { bold: true, color: { rgb: "FFFFFF" } }, fill: { fgColor: { rgb: "091221" } }, alignment: { horizontal: "center" }, border: { bottom: { style: "medium", color: { rgb: "00d4ff" } } } };
+    const colsCount = 6;
+    for(let c=0; c<colsCount; c++) {
+      const cell = XLSX.utils.encode_cell({c:c, r:2});
+      if(wsLogs[cell]) wsLogs[cell].s = thStyle;
+    }
+    
+    // Colorear niveles de riesgo
+    for(let r=3; r<logsData.length; r++) {
+      const levelCell = XLSX.utils.encode_cell({c:5, r:r});
+      if(wsLogs[levelCell]) {
+        let fgColor = "E8F5E9"; // info (light green)
+        let fontColor = "2E7D32";
+        if(wsLogs[levelCell].v === "ADVERTENCIA") { fgColor = "FFF3E0"; fontColor = "E65100"; }
+        else if(wsLogs[levelCell].v === "CRÍTICO") { fgColor = "FFEBEE"; fontColor = "C62828"; }
+        
+        wsLogs[levelCell].s = { 
+          fill: { fgColor: { rgb: fgColor } },
+          font: { bold: true, color: { rgb: fontColor } },
+          alignment: { horizontal: "center" }
+        };
+      }
+      
+      // Bordes sutiles para todas las celdas de la fila
+      for(let c=0; c<colsCount; c++) {
+        const rowCell = XLSX.utils.encode_cell({c:c, r:r});
+        if(wsLogs[rowCell]) {
+          wsLogs[rowCell].s = { ...wsLogs[rowCell].s, border: { bottom: { style: "thin", color: { rgb: "EEEEEE" } } } };
+        }
+      }
+    }
+    
+    wsLogs['!cols'] = [{ wch: 22 }, { wch: 25 }, { wch: 12 }, { wch: 60 }, { wch: 18 }, { wch: 18 }];
+    
+    // =========================================================================
+    // GENERAR LIBRO Y DESCARGAR
+    // =========================================================================
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, "Logs de Seguridad");
+    XLSX.utils.book_append_sheet(workbook, wsDashboard, "Dashboard y Resumen");
+    XLSX.utils.book_append_sheet(workbook, wsLogs, "Logs Detallados");
     
-    // Descargar el archivo .xlsx
-    XLSX.writeFile(workbook, `GamePassKey_Logs_${new Date().toISOString().split('T')[0]}.xlsx`);
+    XLSX.writeFile(workbook, `GamePassKey_Seguridad_${new Date().toISOString().split('T')[0]}.xlsx`);
     
     if(btn) btn.disabled = false;
   } catch (err) {
