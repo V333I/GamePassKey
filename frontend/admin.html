@@ -325,7 +325,7 @@
         <form id="form-resolver-ticket" onsubmit="event.preventDefault()">
           <input type="hidden" id="rt-id">
           <div class="form-group">
-            <label class="form-label">Mensaje para el usuario (Opcional)</label>
+            <label class="form-label" for="rt-respuesta">Mensaje para el usuario (Opcional)</label>
             <textarea id="rt-respuesta" class="form-input" rows="4" placeholder="Ej: Tu PC ha sido desvinculada exitosamente..."></textarea>
           </div>
           <div class="form-actions" style="margin-top: 20px;">
@@ -348,27 +348,27 @@
         <input type="hidden" id="juego-id" />
         <div class="form-grid-2">
           <div class="admin-form-group">
-            <label>Título *</label>
+            <label for="j-titulo">Título *</label>
             <input type="text" id="j-titulo" required placeholder="Nombre del juego" />
           </div>
           <div class="admin-form-group">
-            <label>Género</label>
+            <label for="j-genero">Género</label>
             <input type="text" id="j-genero" placeholder="Ej: RPG, Action" />
           </div>
           <div class="admin-form-group">
-            <label>Desarrollador</label>
+            <label for="j-desarrollador">Desarrollador</label>
             <input type="text" id="j-desarrollador" placeholder="Estudio desarrollador" />
           </div>
           <div class="admin-form-group">
-            <label>Versión</label>
+            <label for="j-version">Versión</label>
             <input type="text" id="j-version" placeholder="Ej: 1.0.0" />
           </div>
           <div class="admin-form-group">
-            <label>Fecha de lanzamiento</label>
+            <label for="j-fecha">Fecha de lanzamiento</label>
             <input type="date" id="j-fecha" />
           </div>
           <div class="admin-form-group">
-            <label>Estado</label>
+            <label for="j-estado">Estado</label>
             <select id="j-estado" class="admin-select">
               <option value="activo">Activo</option>
               <option value="inactivo">Inactivo</option>
@@ -378,17 +378,17 @@
           </div>
         <div class="form-grid-2">
           <div class="admin-form-group" style="grid-column: span 2;">
-            <label>Carátula (Opcional)</label>
+            <label for="j-caratula">Carátula (Opcional)</label>
             <input type="text" id="j-caratula" placeholder="https://ejemplo.com/imagen.jpg" />
             <small style="color:var(--text-muted);font-size:0.7rem;margin-top:4px;">Pega la URL de una imagen de internet (Ej: desde Steam, IGDB o Google).</small>
           </div>
         </div>
         <div class="admin-form-group">
-          <label>Descripción</label>
+          <label for="j-descripcion">Descripción</label>
           <textarea id="j-descripcion" rows="3" placeholder="Descripción del juego..."></textarea>
         </div>
         <div class="admin-form-group">
-          <label>Ruta instalador</label>
+          <label for="j-ruta">Ruta instalador</label>
           <input type="text" id="j-ruta" placeholder="games/nombre/setup.exe" />
         </div>
         <div id="form-juego-error" class="alert alert-error hidden"><span id="form-juego-error-msg"></span></div>
@@ -413,19 +413,19 @@
       <form id="form-usuario" onsubmit="submitUsuario(event)">
         <div class="form-grid-2">
           <div class="admin-form-group">
-            <label>Nombre *</label>
+            <label for="u-nombre">Nombre *</label>
             <input type="text" id="u-nombre" required placeholder="Nombre completo" />
           </div>
           <div class="admin-form-group">
-            <label>Correo *</label>
+            <label for="u-correo">Correo *</label>
             <input type="email" id="u-correo" required placeholder="correo@ejemplo.com" />
           </div>
           <div class="admin-form-group">
-            <label>Contraseña *</label>
+            <label for="u-password">Contraseña *</label>
             <input type="password" id="u-password" required minlength="6" placeholder="Mínimo 6 caracteres" />
           </div>
           <div class="admin-form-group">
-            <label>Rol</label>
+            <label for="u-rol">Rol</label>
             <select id="u-rol" class="admin-select">
               <option value="2">Cliente</option>
               <option value="3">Soporte</option>
@@ -455,26 +455,26 @@
       <form id="form-licencia" onsubmit="submitLicencia(event)">
         <div class="form-grid-2">
           <div class="admin-form-group">
-            <label>Usuario *</label>
+            <label for="l-usuario">Usuario *</label>
             <select id="l-usuario" class="admin-select" required>
               <option value="">Seleccionar usuario...</option>
             </select>
           </div>
           <div class="admin-form-group">
-            <label>Juego *</label>
+            <label for="l-juego">Juego *</label>
             <select id="l-juego" class="admin-select" required>
               <option value="">Seleccionar juego...</option>
             </select>
           </div>
           <div class="admin-form-group">
-            <label>Clave de licencia *</label>
+            <label for="l-expiracion">Clave de licencia *</label>
             <div style="display:flex;gap:8px">
               <input type="text" id="l-clave" required placeholder="GPK-XXXX-XXXX-XXXX" style="flex:1"/>
               <button type="button" class="btn-secondary btn-sm" onclick="generarClave()">Auto</button>
             </div>
           </div>
           <div class="admin-form-group">
-            <label>Fecha de expiración</label>
+            <label for="l-expiracion">Fecha de expiración</label>
             <input type="date" id="l-expiracion" />
           </div>
         </div>
@@ -502,7 +502,7 @@
           Usuario: <strong id="estado-user-nombre" style="color:var(--text-primary)"></strong>
         </p>
         <div class="admin-form-group">
-          <label>Nuevo estado</label>
+          <label for="estado-nuevo">Nuevo estado</label>
           <select id="estado-nuevo" class="admin-select">
             <option value="activo">Activo</option>
             <option value="bloqueado">Bloqueado</option>
@@ -545,13 +545,13 @@
 
         <div class="form-grid-2">
           <div class="admin-form-group">
-            <label>Juego asociado *</label>
+            <label for="c-juego">Juego asociado *</label>
             <select id="c-juego" class="admin-select" required>
               <option value="">Seleccionar juego...</option>
             </select>
           </div>
           <div class="admin-form-group">
-            <label>Fecha de expiración *</label>
+            <label for="c-expiracion">Fecha de expiración *</label>
             <input type="datetime-local" id="c-expiracion" required />
           </div>
         </div>
